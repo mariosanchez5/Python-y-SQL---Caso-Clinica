@@ -5,15 +5,15 @@ def Main():
         opcion = int(input('Ingresa 1 para ver los pacientes de la clinica\nIngresa 2 para mostrar el detalle de un paciente\nIngresa 3 para cambiar a un paciente de cama\nIngresa 4 para cambiar a un paciente de medico\nIngresa 5 para crear camas y habitaciones\nIngresa 6 para salir: \n'))
 
         if opcion == 1:
-            pass
+            MostrarTodos()
         elif opcion == 2:
-            pass
+            MostrasUnPaciente()
         elif opcion == 3:
-            pass
+            CambiarCama()
         elif opcion == 4:
-            pass
+            CambiarMedico()
         elif opcion == 5:
-            pass
+            CrearCamaYHabitacion()
         elif opcion == 6:
             break
         else:
