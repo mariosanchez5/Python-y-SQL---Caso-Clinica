@@ -5,14 +5,20 @@ def MostrarTodos():
     VerTodosPacientes()
 
 def MostrasUnPaciente():
-    rut = input("Ingrese el Rut del paciente sin puntos ni guion: ")
+    rut = input("Ingrese el Rut del paciente sin puntos con guion: ")
     FiltrarPacientes(rut)
 
 def CambiarCama():
-    pass
+    #Por ahora lo dejaremos simple
+    id_paciente = int(input('Ingresa el id del paciente a cambiar de cama: '))
+    id_cama = int(input('Ingresa el id de la nueva cama: '))
+    CambiarPacienteCama(id_cama, id_paciente)
 
 def CambiarMedico():
-    pass
+    #Por ahora lo dejaremos simple
+    id_paciente = int(input('Ingresa el id del paciente a cambiar de medico: '))
+    id_medico = int(input('Ingresa el id del medico: '))
+    CambiarPacienteCama(id_paciente, id_medico)
 
 def CrearCamaYHabitacion():
     opcion = int(input('Ingresa 1 si deseas crear una cama, Ingresa 2 si deseas crear una habitación'))
