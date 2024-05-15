@@ -1,95 +1,44 @@
-CREATE TABLE Paciente (
+CREATE TABLE pacientes (
     id_paciente INT PRIMARY KEY,
     nombre VARCHAR(50),
 	apellido VARCHAR(50),
 	rut VARCHAR(50),
-    edad INT,
-    genero VARCHAR(10)
+    FOREIGN KEY (medicos_id) REFERENCES medicos(id_medico)
+    FOREIGN KEY (camas_id) REFERENCES camas(id_cama)
 );
 
-CREATE TABLE Cama (
+CREATE TABLE cama (
     id_cama INT PRIMARY KEY,
-    disponible BOOLEAN
+    disponible BOOLEAN,
+    FOREIGN KEY (habitaciones_id) REFERENCES habitaciones(id_habitacion)
 );
 
-CREATE TABLE Habitacion (
+CREATE TABLE habitaciones (
     id_habitacion INT PRIMARY KEY,
-    zona VARCHAR(50),
-	ncamas INT
 );
 
-CREATE TABLE AsignacionCama (
-    id_asignacion INT PRIMARY KEY,
-    id_paciente INT,
-    id_cama INT,
-    fecha_inicio DATE,
-    fecha_fin DATE,
-    FOREIGN KEY (id_paciente) REFERENCES Paciente(id_paciente),
-    FOREIGN KEY (id_cama) REFERENCES Cama(id_cama)
-);
-
-CREATE TABLE UbicacionCama (
-    id_relacion INT PRIMARY KEY,
-    id_cama INT,
-    id_habitacion INT,
-    FOREIGN KEY (id_cama) REFERENCES Cama(id_cama),
-    FOREIGN KEY (id_habitacion) REFERENCES Habitacion(id_habitacion)
-);
-
-CREATE TABLE Medico (
+CREATE TABLE medicos (
     id_medico INT PRIMARY KEY,
     nombre VARCHAR(50),
 	apellido VARCHAR(50),
-    especialidad VARCHAR(50)
+    rut INT
 );
 
-CREATE TABLE AsignacionMedico (
-    id_asignacion INT PRIMARY KEY,
-    id_paciente INT,
-    id_medico INT,
-    fecha_asignacion DATE,
-    fecha_desasignacion DATE,
-    FOREIGN KEY (id_paciente) REFERENCES Paciente(id_paciente),
-    FOREIGN KEY (id_medico) REFERENCES Medico(id_medico)
-);
 
-CREATE TABLE Examen (
+CREATE TABLE examenes (
     id_examen INT PRIMARY KEY,
     nombre VARCHAR(100),
-    tipo VARCHAR(50)
+    resultado VARCHAR(100),
+    FOREIGN KEY (medicos_id) REFERENCES medicos(id_medico),
+    FOREIGN KEY (pacientes_id) REFERENCES pacientes(id_paciente),
+    fecha DATE
 );
 
-CREATE TABLE OrdenExamen (
-    id_orden INT PRIMARY KEY,
-    id_paciente INT,
-    id_medico INT,
-    id_examen INT,
-    fecha DATE,
-    posible_diagnostico VARCHAR(200),
-    FOREIGN KEY (id_paciente) REFERENCES Paciente(id_paciente),
-    FOREIGN KEY (id_medico) REFERENCES Medico(id_medico),
-    FOREIGN KEY (id_examen) REFERENCES Examen(id_examen)
-);
 
-CREATE TABLE Diagnostico (
+CREATE TABLE diagnosticos (
     id_diagnostico INT PRIMARY KEY,
-    id_paciente INT,
-    id_medico INT,
-    id_enfermedad INT,
-    FOREIGN KEY (id_paciente) REFERENCES Paciente(id_paciente),
-    FOREIGN KEY (id_medico) REFERENCES Medico(id_medico)
+    FOREIGN KEY (pacientes_id) REFERENCES pacientes(id_paciente),
+    FOREIGN KEY (medicos_id) REFERENCES medicos(id_medico),
+    enfermedad VARCHAR(100)
 );
 
-CREATE TABLE Enfermedad (
-    id_enfermedad INT PRIMARY KEY,
-    nombre VARCHAR(100),
-    tipo VARCHAR(50)
-);
-
-CREATE TABLE ExamenEnfermedad (
-    id_relacion INT PRIMARY KEY,
-    id_enfermedad INT,
-    id_examen INT,
-    FOREIGN KEY (id_enfermedad) REFERENCES Enfermedad(id_enfermedad),
-    FOREIGN KEY (id_examen) REFERENCES Examen(id_examen)
-);
