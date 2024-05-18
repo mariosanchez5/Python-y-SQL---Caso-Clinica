@@ -5,7 +5,7 @@ from src.cama import Cama
 from src.examen import Examen
 from src.diagnostico import Diagnostico
 
-from src.dummy_repositorio_clinica import \
+from src.repositorio_clinica import \
     guardar_paciente, guardar_medico, guardar_habitacion,\
     guardar_cama, guardar_examen, guardar_diagnostico,\
     obtener_paciente_por_rut, obtener_medico_por_rut,\

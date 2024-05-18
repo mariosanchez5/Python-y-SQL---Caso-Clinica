@@ -41,7 +41,14 @@ class Paciente:
         return (self.nombre, self.apellido, self.rut, self.medico_tratante, self.cama)
     
     def from_row(row):
-        return Paciente(row[1], row[2], row[3], row[4], row[5])
+        # (id, nombre, apellido, rut, medico_tratante, cama)
+        return Paciente(
+            nombre=row[1], 
+            apellido=row[2], 
+            rut=row[3], 
+            medico_tratante=row[4], 
+            cama=row[5]
+        )
 
     # Redefinir el operador de igualdad
     def __eq__(self, other):

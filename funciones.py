@@ -1,4 +1,4 @@
-from src.dummy_repositorio_clinica import *
+from src.repositorio_clinica import *
 from src.inicializacion import *
 
 inicializar_datos()
