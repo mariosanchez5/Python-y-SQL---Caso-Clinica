@@ -1,5 +1,4 @@
-from funciones import *
-
+from src.funciones import *
 from src.auxiliares import mostrar_menu, limpiar_pantalla
 from src.repositorio_clinica import obtener_pacientes,\
     obtener_camas, obtener_medicos, obtener_habitaciones,\
