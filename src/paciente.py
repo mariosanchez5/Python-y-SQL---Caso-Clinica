@@ -5,11 +5,11 @@ class Paciente:
         self.rut = rut
         self.medico_tratante = medico_tratante
         self.cama = cama
-        self.habitacion = cama.habitacion if cama else None
+        self.habitacion = None if cama is None else cama.habitacion
         self.diagnosticos = diagnosticos.copy()
         self.examenes = examenes.copy()
         self.ultimo_examen = None
-    
+
     def agregar_diagnostico(self, diagnostico):
         self.diagnosticos.append(diagnostico)
 
@@ -38,7 +38,14 @@ class Paciente:
         }
 
     def to_row(self):
-        return (self.nombre, self.apellido, self.rut, self.medico_tratante, self.cama)
+        # Adaptar a la estructura de la base de datos
+        return (
+            self.nombre,
+            self.apellido,
+            self.rut,
+            self.medico_tratante.rut if self.medico_tratante else None,
+            self.cama.id if self.cama else None
+        )
     
     def from_row(row):
         # (id, nombre, apellido, rut, medico_tratante, cama)
