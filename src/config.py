@@ -1,6 +1,6 @@
 # Módulo de configuración
 # Este sencillo módulo lee la configuración de la applicación desde un archivo de configuración.
-
+import os
 
 
 CONFIG_FILES = ['config.yml', 'config.json', 'config.toml']
