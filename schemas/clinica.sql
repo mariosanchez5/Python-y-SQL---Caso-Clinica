@@ -1,55 +1,55 @@
 CREATE TABLE habitaciones (
-    id_habitacion serial PRIMARY KEY
+    id_habitacion VARCHAR(50) PRIMARY KEY,
+    camas_ids INT[]
 );
 
 
 CREATE TABLE camas (
-    id_cama serial PRIMARY KEY,
+    id_cama INT PRIMARY KEY,
     disponible BOOLEAN,
-    habitaciones_id INT,
+    habitaciones_id VARCHAR(50),
     FOREIGN KEY (habitaciones_id) REFERENCES habitaciones(id_habitacion)
 );
 
 
 CREATE TABLE medicos (
-    id_medico serial PRIMARY KEY,
+    rut INT PRIMARY KEY,
     nombre VARCHAR(50),
-	apellido VARCHAR(50),
-    rut INT
+	apellido VARCHAR(50)
 );
 
 
 CREATE TABLE pacientes (
-    id_paciente serial PRIMARY KEY,
+    rut INT PRIMARY KEY,
     nombre VARCHAR(50),
 	apellido VARCHAR(50),
-	rut VARCHAR(50),
     medicos_id INT,
     camas_id INT,
-    FOREIGN KEY (medicos_id) REFERENCES medicos(id_medico),
+    FOREIGN KEY (medicos_id) REFERENCES medicos(rut),
     FOREIGN KEY (camas_id) REFERENCES camas(id_cama)
 );
 
 
 
 CREATE TABLE examenes (
-    id_examen serial PRIMARY KEY,
+    id_examen INT PRIMARY KEY,
     nombre VARCHAR(100),
     resultado VARCHAR(100),
     medicos_id INT,
     pacientes_id INT,
-    FOREIGN KEY (medicos_id) REFERENCES medicos(id_medico),
-    FOREIGN KEY (pacientes_id) REFERENCES pacientes(id_paciente),
+    FOREIGN KEY (medicos_id) REFERENCES medicos(rut),
+    FOREIGN KEY (pacientes_id) REFERENCES pacientes(rut),
     fecha DATE
 );
 
 
 CREATE TABLE diagnosticos (
-    id_diagnostico serial PRIMARY KEY,
+    id_diagnostico INT PRIMARY KEY,
     pacientes_id INT,
     medicos_id INT,
-    FOREIGN KEY (pacientes_id) REFERENCES pacientes(id_paciente),
-    FOREIGN KEY (medicos_id) REFERENCES medicos(id_medico),
-    enfermedad VARCHAR(100)
+    FOREIGN KEY (pacientes_id) REFERENCES pacientes(rut),
+    FOREIGN KEY (medicos_id) REFERENCES medicos(rut),
+    enfermedad VARCHAR(100),
+    examenes_id INT[]
 );
 
