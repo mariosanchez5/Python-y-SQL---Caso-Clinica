@@ -286,14 +286,14 @@ def obtener_cama_por_id(id, cursor=None) -> Cama or None:
 
 
 @conexion_segura
-def obtener_camas() -> list[Cama]:
+def obtener_camas(cursor=None) -> list[Cama]:
     cursor.execute("SELECT * FROM camas")
     for row in cursor:
         yield Cama(row[0], row[1], row[2])
 
 
 @conexion_segura
-def obtener_camas_disponibles() -> list[Cama]:
+def obtener_camas_disponibles(cursor=None) -> list[Cama]:
     cursor.execute("SELECT * FROM camas WHERE disponible = TRUE")
     for row in cursor:
         yield Cama(row[0], row[1], row[2])
@@ -315,7 +315,7 @@ def guardar_examen(examen) -> int or None:
 
 
 @conexion_segura
-def obtener_examen_por_id(id) -> Examen or None:
+def obtener_examen_por_id(id, cursor=None) -> Examen or None:
     cursor.execute("SELECT * FROM examenes WHERE id_examen = %s",(id,))
     if cursor.rowcount > 0:
         return Examen(row[0], row[1], row[2], int_to_rut(row[3]), int_to_rut(row[4]), row[5])
@@ -352,7 +352,7 @@ def guardar_diagnostico(diagnostico, cursor=None) -> None:
         }
     )
 
-
+@conexion_segura
 def obtener_diagnostico_por_id(id, cursor=None) -> Diagnostico or None:
     cursor.execute("SELECT * FROM diagnosticos WHERE id = %s",(id,))
     if cursor.rowcount > 0:
