@@ -4,19 +4,46 @@ from src.examen import Examen
 from src.medico import Medico
 from src.diagnostico import Diagnostico
 from src.cama import Cama
-from src.config import config
+from src.config import leer_config
+
+import os
 
 import psycopg2
+import psycopg2.extensions as extensions
 
 ########################
 # Gestión de la conexión
 conexion = None
-db_config = config.postgresql
+db_config = leer_config()['sql']
+
+def obtener_schemas():
+    schemas_limpios = []
+    schemas_dir = db_config['schemas_dir']
+    # Verificar si el directorio de schemas existe
+    # Si la ruta es relativa, convertirla a absoluta
+    schemas_dir = os.path.abspath(schemas_dir)
+    if not os.path.exists(schemas_dir):
+        raise FileNotFoundError(f"El directorio de schemas {schemas_dir} no existe")
+    # Leer los archivos de schemas
+    for schema in db_config['schemas']:
+        # Verificar si el archivo existe
+        schema_file = os.path.join(schemas_dir, schema)
+        # Si no tiene la extensión .sql, agregarla
+        if not schema_file.endswith('.sql'):
+            schema_file += '.sql'
+        if not os.path.exists(schema_file):
+            raise FileNotFoundError(f"El archivo de schema {schema_file} no existe")
+        schemas_limpios.append(schema_file)
+    return schemas_limpios
 
 
 def obtener_conexion():
+    global conexion
+    conn_config = db_config['conexion']
     if conexion is None:
-        conexion = psycopg2.connect(host=config.host,database=config.database,user=config.user,password=config.password)
+        conexion = psycopg2.connect(
+            **conn_config,
+        )
     return conexion    
 
 # Decorador para manejar la conexión segura
@@ -34,40 +61,77 @@ def conexion_segura(func):
             conexion.commit()
     return wrapper
 
+
+def verificar_db_existente():
+    host = db_config['conexion']['host']
+    port = db_config['conexion']['port']
+    dbname = db_config['conexion']['dbname']
+    user = db_config['conexion']['user']
+    password = db_config['conexion']['password']
+    # Verificar que la db exista
+    conexion = psycopg2.connect(
+        host=host,
+        port=port,
+        dbname='postgres',
+        user=user,
+        password=password
+    )
+    cursor = conexion.cursor()
+    conexion.set_isolation_level(extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+    cursor.execute(f"SELECT 1 FROM pg_database WHERE datname = '{dbname}'")
+    if cursor.fetchone():
+        # Si existe, borrarla
+        cursor.execute(f"DROP DATABASE {dbname}")
+    cursor.execute(f"CREATE DATABASE {dbname}")
+    conexion.commit()
+    conexion.close()
+
+@conexion_segura
+def cargar_schemas(cursor=None):
+    # Cargar los schemas
+    schemas = obtener_schemas()
+    for schema in schemas:
+        with open(schema) as f:
+            cursor.execute(f.read())
+
+verificar_db_existente()
+cargar_schemas()
+
 ########################################
 
 
 # Pacientes
 @conexion_segura
-def guardar_paciente(paciente) -> None:
-    cursor = kwargs['cursor']
+def guardar_paciente(paciente, cursor=None) -> None:
     p = obtener_paciente_por_rut(paciente.rut)
     if p:
         cursor.execute("DELETE FROM pacientes WHERE rut = %s", (p,))
-    cursor.execute("INSERT INTO pacientes (nombre, apellido, rut, medicos_id, camas_id) VALUES (%s, %s, %s, %s, %s)", (paciente.nombre, paciente.apellido, paciente.rut, paciente.medicos_id, paciente.camas_id))
+    cursor.execute(
+        "INSERT INTO pacientes (nombre, apellido, rut, medicos_id, camas_id) VALUES (%s, %s, %s, %s, %s)",
+         paciente.to_row()
+    )
 
 
 @conexion_segura
-def quitar_paciente(paciente) -> None:
+def quitar_paciente(paciente, cursor=None) -> None:
     return None
 
 
 @conexion_segura
-def obtener_paciente_por_rut(rut) -> Paciente or None:
+def obtener_paciente_por_rut(rut, cursor=None) -> Paciente or None:
     #select_filter_paciente = cursor.execute("SELECT * FROM pacientes WHERE rut = %s",(rut,))
-    return Paciente('dummy_nombre', 'dummy_apellido', '0000000-1', '1111111-2', '10000')
+    return None
 
 
 @conexion_segura
-def obtener_pacientes() -> list[Paciente]:
+def obtener_pacientes(cursor=None) -> list[Paciente]:
     return []
 
 
 
 # Médicos
 @conexion_segura
-def guardar_medico(medico) -> None:
-    cursor = kwargs['cursor']
+def guardar_medico(medico, cursor=None) -> None:
     # m = obtener_medico_por_rut(medico.rut)
     # if m:
     #     cursor.execute("DELETE FROM medicos WHERE rut = %s", (m,))
@@ -76,17 +140,14 @@ def guardar_medico(medico) -> None:
     
 
 @conexion_segura
-def quitar_medico(medico) -> None:
-    cursor = kwargs['cursor']
+def quitar_medico(medico, cursor=None) -> None:
     m = obtener_medico_por_rut(medico.rut)
     if m:
         cursor.execute("DELETE FROM medicos WHERE rut = %s", (m,))
     return None
 
 @conexion_segura
-def obtener_medico_por_rut(rut) -> Medico or None:
-    cursor = kwargs['cursor'] 
-
+def obtener_medico_por_rut(rut, cursor=None) -> Medico or None:
     # select_filter_medico = cursor.execute("SELECT * FROM medicos WHERE rut = %s",(rut,))
     # if select_filter_medico.rowcount > 0:
     #     row = select_filter_medico.fetchone()
@@ -98,9 +159,7 @@ def obtener_medico_por_rut(rut) -> Medico or None:
     return None
 
 @conexion_segura
-def obtener_medicos() -> list[Medico]:
-    cursor = kwargs['cursor']
-
+def obtener_medicos(cursor=None) -> list[Medico]:
     # all = cursor.execute("SELECT * FROM medicos")
     # if all.rowcount > 0: 
     #     row = all.fetchone() 
@@ -114,9 +173,7 @@ def obtener_medicos() -> list[Medico]:
 
 # Habitaciones
 @conexion_segura
-def guardar_habitacion(habitacion) -> None:
-    cursor = kwargs['cursor']
-    
+def guardar_habitacion(habitacion, cursor=None) -> None:
     # h = obtener_habitacion_por_id(habitacion.id)
     # if h:
     #     cursor.execute("DELETE FROM habitaciones WHERE id_habitacion = %s", (h,))
@@ -125,9 +182,7 @@ def guardar_habitacion(habitacion) -> None:
 
 
 @conexion_segura
-def obtener_habitacion_por_id(id) -> Habitacion or None:
-    cursor = kwargs['cursor']
-
+def obtener_habitacion_por_id(id, cursor=None) -> Habitacion or None:
     # select_filter_habitacion = cursor.execute("SELECT * FROM habitaciones WHERE id_habitacion = %s",(id,))
     # if select_filter_habitacion.rowcount > 0:
     #     row = select_filter_habitacion.fetchone()
@@ -140,9 +195,7 @@ def obtener_habitacion_por_id(id) -> Habitacion or None:
 
 
 @conexion_segura
-def obtener_habitaciones():
-    cursor = kwargs['cursor']
-
+def obtener_habitaciones(cursor=None):
     all = cursor.execute("SELECT * FROM habitaciones")
     if all.rowcount > 0: 
         row = all.fetchone() 
@@ -163,9 +216,7 @@ def guardar_cama(cama):
     habitacion.agregar_cama(cama)
 
 @conexion_segura
-def obtener_cama_por_id(id) -> Cama or None:
-    cursor = kwargs['cursor']
-
+def obtener_cama_por_id(id, cursor=None) -> Cama or None:
     # select_filter_cama = cursor.execute("SELECT * FROM camas WHERE id_cama = %s",(id,))
     # if select_filter_cama.rowcount > 0:
     #     row = select_filter_cama.fetchone()
@@ -198,13 +249,11 @@ def obtener_examen_por_id(id) -> Examen or None:
     return None
 
 
-def obtener_examenes_por_paciente(paciente) -> list[Examen]:
+def obtener_examenes_por_paciente(paciente, cursor=None) -> list[Examen]:
     return []
 
 @conexion_segura
-def obtener_examenes() -> list[Examen]:
-    cursor = kwargs['cursor']
-
+def obtener_examenes(cursor=None) -> list[Examen]:
     # all = cursor.execute("SELECT * FROM medicos")
     # if all.rowcount > 0: 
     #     row = all.fetchone() 
@@ -218,16 +267,14 @@ def obtener_examenes() -> list[Examen]:
 
 # Diagnósticos
 @conexion_segura
-def guardar_diagnostico(diagnostico) -> None:
+def guardar_diagnostico(diagnostico, cursor=None) -> None:
     return None
 
-def obtener_diagnostico_por_paciente(paciente) -> Diagnostico or None:
+def obtener_diagnostico_por_paciente(paciente, cursor=None) -> Diagnostico or None:
     return None
 
 @conexion_segura
-def obtener_diagnosticos() -> list[Diagnostico]:
-    cursor = kwargs['cursor']
-
+def obtener_diagnosticos(cursor=None) -> list[Diagnostico]:
     # all = cursor.execute("SELECT * FROM medicos")
     # if all.rowcount > 0: 
     #     row = all.fetchone() 
