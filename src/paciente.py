@@ -5,6 +5,7 @@ class Paciente:
         self.rut = rut
         self.medico_tratante = medico_tratante
         self.cama = cama
+        self.habitacion = cama.habitacion if cama else None
         self.diagnosticos = diagnosticos.copy()
         self.examenes = examenes.copy()
         self.ultimo_examen = None
@@ -17,10 +18,11 @@ class Paciente:
         self.ultimo_examen = examen
 
     def asignar_medico(self, medico):
-        if self.medico_tratante:
-            self.medico_tratante.quitar_paciente(self)
         self.medico_tratante = medico
-        self.medico_tratante.agregar_paciente(self)
+
+    def asignar_cama(self, cama):
+        self.cama = cama
+        self.habitacion = cama.habitacion
 
     def to_dict(self):
         return {
@@ -28,7 +30,8 @@ class Paciente:
             'apellido': self.apellido,
             'rut': self.rut,
             'medico_tratante': self.medico_tratante.rut if self.medico_tratante else None,
-            'cama': self.cama,
+            'cama': self.cama.id if self.cama else None,
+            'habitacion': self.habitacion.id if self.habitacion else None,
             'diagnosticos': [diagnostico.to_dict() for diagnostico in self.diagnosticos],
             'examenes': [examen.to_dict() for examen in self.examenes],
             'ultimo_examen': self.ultimo_examen.to_dict() if self.ultimo_examen else None

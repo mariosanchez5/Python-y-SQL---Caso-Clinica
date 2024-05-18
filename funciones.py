@@ -3,6 +3,37 @@ from src.inicializacion import *
 
 inicializar_datos()
 
+###### AUXILIARES ######
+def solicitar_cama_por_id():
+    id_cama = int(input("Ingrese el ID de la cama: "))
+    cama = obtener_cama_por_id(id_cama)
+    if cama:
+        if cama.disponible:
+            return cama
+    print("Cama no encontrada o no disponible") 
+    return None
+
+
+def solicitar_paciente():
+    rut = input("Ingrese el RUT del paciente sin puntos con guión: ")
+    paciente = obtener_paciente_por_rut(rut)
+    if not paciente:
+        print("Paciente no registrado")
+        return None
+    return paciente
+
+
+def solicitar_medico():
+    rut = input("Ingrese el RUT del médico sin puntos con guión: ")
+    medico = obtener_medico_por_rut(rut)
+    if not medico:
+        print("Médico no registrado")
+        return None
+    return medico
+
+#########################
+
+
 def mostrar_pacientes():
     pacientes = obtener_pacientes()
     for paciente in pacientes:
@@ -10,39 +41,50 @@ def mostrar_pacientes():
 
 
 def mostrar_paciente_por_rut():
-    rut = input("Ingrese el RUT del paciente sin puntos con guión: ")
-    paciente = obtener_paciente_por_rut(rut)
+    paciente = solicitar_paciente() 
     if paciente:
         print(paciente.to_dict())
     else:
         print("Paciente no encontrado")
 
+
 def cambiar_paciente_cama():
-    rut = input("Ingrese el RUT del paciente sin puntos con guión: ")
-    paciente = obtener_paciente_por_rut(rut)
-    # Caso 1: Paciente no existe
-    if not paciente:
-        print("Paciente no encontrado")
-        return
-    # Caso 2: Paciente existe y no tiene cama
-    if not paciente.cama:        
-        print("Paciente no tiene cama asignada.")
-        id_cama = int(input("Ingrese el ID de la cama: "))
-        paciente.cama = id_cama
-    # Caso 3: Paciente existe y tiene cama
-    else:
-        id_cama = int(input("Ingrese el nuevo ID de la nueva cama: "))
-        # Desasignar cama
-        
-    else:
-        print("Paciente no encontrado")
+    paciente = solicitar_paciente()
+    if not paciente: return
+    # Hasta acá se ha validado que el paciente existe
+    cama_asignada = solicitar_cama_por_id()
+    if not cama_asignada: return
+    # Hasta acá se ha validado que el paciente existe y la cama está disponible
+    if paciente.cama:
+        cama_actual = obtener_cama_por_id(paciente.cama)
+        cama_actual.desocupar()
+        guardar_cama(cama_actual)
+    paciente.asignar_cama(cama_asignada)
+    cama_asignada.ocupar()
+    guardar_paciente(paciente)
+    guardar_cama(cama_asignada)
+    print("Cama asignada correctamente")
+    return
 
 
-def CambiarCama():
-    #Por ahora lo dejaremos simple
-    id_paciente = int(input('Ingresa el id del paciente a cambiar de cama: '))
-    id_cama = int(input('Ingresa el id de la nueva cama: '))
-    CambiarPacienteCama(id_cama, id_paciente)
+def cambiar_paciente_medico():
+    paciente = solicitar_paciente()
+    if not paciente: return
+    medico = solicitar_medico()
+    if not medico: return
+    # Hasta acá se ha validado que el paciente y el médico existen
+    if paciente.medico_tratante:
+        medico_actual = obtener_medico_por_rut(paciente.medico_tratante.rut)
+        medico_actual.quitar_paciente(paciente)
+        guardar_medico(medico_actual)
+    paciente.asignar_medico(medico)
+    medico.agregar_paciente(paciente)
+    guardar_paciente(paciente)
+    guardar_medico(medico)
+    print("Médico asignado correctamente")
+    return
+
+
 
 def CambiarMedico():
     #Por ahora lo dejaremos simple

@@ -4,11 +4,17 @@ class Medico:
         self.apellido = apellido
         self.rut = rut
         self.pacientes = pacientes.copy()
+
     def agregar_paciente(self, paciente):
+        for p in self.pacientes:
+            if p.rut == paciente.rut:
+                return
         self.pacientes.append(paciente)
     
     def quitar_paciente(self, paciente):
-        self.pacientes.remove(paciente)
+        for p in self.pacientes:
+            if p.rut == paciente.rut:
+                self.pacientes.remove(p)
 
     def to_dict(self):
         return {

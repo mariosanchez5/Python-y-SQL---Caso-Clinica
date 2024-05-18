@@ -1,5 +1,8 @@
 from funciones import *
 from src.auxiliares import mostrar_menu, limpiar_pantalla
+from src.dummy_repositorio_clinica import obtener_pacientes,\
+    obtener_camas, obtener_medicos, obtener_habitaciones,\
+    obtener_examenes, obtener_diagnosticos
 
 def main():
     opciones_validas = [ "Ver pacientes de la clínica",
@@ -7,6 +10,7 @@ def main():
                          "Cambiar a paciente de cama",
                          "Cambiar a paciente de médico",
                          "Crear camas y habitaciones",
+                         "Otras acciones",
                          "Salir"]
     
     titulo = "Gestión hospitalaria"
@@ -30,10 +34,33 @@ def main():
         elif opcion == "5":
             crear_camas_y_habitaciones()
             read = input("Presione enter para continuar")
+        elif opcion == "6":
+            acciones_adicionales(mostrar_menu("Otras opciones", ["Ver médicos", "Ver camas", "Ver habitaciones", "Ver examenes", "Ver diagnósticos", "Volver atrás"], "Ingresa la opción deseada:"))
         else:
             print("Hasta luego")
             break
         limpiar_pantalla()
+
+
+def acciones_adicionales(opcion):
+    if opcion == "1":
+        resultado = obtener_medicos()
+    elif opcion == "2":
+        resultado = obtener_camas()
+    elif opcion == "3":
+        resultado = obtener_habitaciones()
+    elif opcion == "4":
+        resultado = obtener_examenes()
+    elif opcion == "5":
+        resultado = obtener_diagnosticos()
+    elif opcion == "6":
+        return
+    else:
+        print("Opción no válida")
+    for r in resultado: print(r.to_dict())
+    read = input("Presione enter para continuar")
+    limpiar_pantalla()
+
 
 if __name__ == "__main__":
     main()

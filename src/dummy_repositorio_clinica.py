@@ -46,9 +46,6 @@ def obtener_pacientes():
 
 
 # Médicos
-def agregar_medico(medico):
-    medicos.append(medico)
-
 def guardar_medico(medico):
     m = obtener_medico_por_rut(medico.rut)
     if m:
@@ -73,10 +70,6 @@ def obtener_medicos():
 
 
 # Habitaciones
-def agregar_habitacion(habitacion):
-    habitaciones.append(habitacion)
-
-
 def guardar_habitacion(habitacion):
     h = obtener_habitacion_por_id(habitacion.id)
     if h:
@@ -96,11 +89,6 @@ def obtener_habitaciones():
 
 
 # Camas
-def agregar_cama(cama, id_habitacion):
-    habitacion = obtener_habitacion_por_id(id_habitacion)
-    habitacion.agregar_cama(cama)
-
-
 def guardar_cama(cama):
     c = obtener_cama_por_id(cama.id)
     if c:
@@ -144,10 +132,6 @@ def obtener_una_cama_disponible():
 
 
 # Exámenes
-def agregar_examen(examen):
-    examenes.append(examen)
-
-
 def guardar_examen(examen):
     e = obtener_examen_por_id(examen.id)
     if e:
@@ -171,3 +155,22 @@ def obtener_examenes_por_paciente(paciente):
 
 def obtener_examenes():
     return examenes
+    
+
+# Diagnósticos
+def guardar_diagnostico(diagnostico):
+    d = obtener_diagnostico_por_paciente(diagnostico.paciente)
+    if d:
+        diagnosticos.remove(d)
+    diagnosticos.append(diagnostico)
+
+
+def obtener_diagnostico_por_paciente(paciente):
+    for diagnostico in diagnosticos:
+        if diagnostico.paciente == paciente:
+            return diagnostico
+    return None
+
+
+def obtener_diagnosticos():
+    return diagnosticos
