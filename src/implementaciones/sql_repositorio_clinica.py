@@ -5,7 +5,7 @@ from src.medico import Medico
 from src.diagnostico import Diagnostico
 from src.cama import Cama
 from src.config import leer_config
-from src.auxiliares import rut_to_int, int_to_rut
+from src.auxiliares import rut_a_int, int_a_rut
 
 import os
 
@@ -98,210 +98,299 @@ def cargar_schemas(cursor=None):
 verificar_db_existente()
 cargar_schemas()
 
+@conexion_segura
+def guardar_campos(tabla, datos, cursor=None):
+    campos = datos.keys()
+    valores = datos.values()
+    campos_str = ', '.join(campos)
+    valores_str = ', '.join(['%s'] * len(valores))
+    # Asumir el primer campo como la llave primaria
+    llave = list(campos)[0]
+    # Buscar si ya existe
+    cursor.execute(f"SELECT * FROM {tabla} WHERE {llave} = %s", (datos[llave],))
+    if cursor.rowcount > 0:
+        # Actualizar
+        campos = [f"{campo} = %s" for campo in campos]
+        campos_str = ', '.join(campos)
+        cursor.execute(
+            f"UPDATE {tabla} SET {campos_str} WHERE {llave} = %s",
+            tuple(valores) + (datos[llave],)
+        )
+    else:
+        # Insertar
+        cursor.execute(
+            f"INSERT INTO {tabla} ({campos_str}) VALUES ({valores_str})",
+            tuple(valores)
+        )
+
+
+@conexion_segura
+def borrar_fila(tabla, llave, valor, cursor=None):
+    cursor.execute(f"DELETE FROM {tabla} WHERE {llave} = %s", (valor,))
 ########################################
 
 
 # Pacientes
-@conexion_segura
-def guardar_paciente(paciente, cursor=None) -> None:
-    p = obtener_paciente_por_rut(paciente.rut)
-    if p:
-        cursor.execute("DELETE FROM pacientes WHERE rut = %s", (p.rut,))
-    # Conseguir datos necesarios 
-    rut_paciente = rut_to_int(paciente.rut)
-    
-    # Obtener id del médico tratante
-    if paciente.medico_tratante:
-        cursor.execute(
-            "SELECT id FROM medicos WHERE rut = %s",
-            (rut_to_int(paciente.medico_tratante.rut),)
-        )
-    id_medico = cursor.fetchone()[0]
-    # Obtener id de la cama
+def guardar_paciente(paciente) -> None:
+    guardar_campos(
+        tabla = 'pacientes',
+        datos = {
+            'rut': rut_a_int(paciente.rut),
+            'nombre': paciente.nombre,
+            'apellido': paciente.apellido,
+            'medicos_id': rut_a_int(paciente.rut_medico_tratante),
+            'camas_id': paciente.id_cama
+        }
+    )
 
-    
-    fila_nueva = (
-        paciente.nombre,
-        paciente.apellido,
-        rut_paciente,
-        rut_to_int(paciente.medico_tratante.rut) if paciente.medico_tratante else None,
-        paciente.cama.id if paciente.cama else None
-    )
-    cursor.execute(
-        "INSERT INTO pacientes (nombre, apellido, rut) VALUES (%s, %s, %s, %s, %s)",
-        fila_nueva
-    )
 @conexion_segura
 def quitar_paciente(paciente, cursor=None) -> None:
-    return None
+    borrar_fila('pacientes', 'rut', rut_a_int(paciente.rut))
 
 
 @conexion_segura
 def obtener_paciente_por_rut(rut, cursor=None) -> Paciente or None:
-    #select_filter_paciente = cursor.execute("SELECT * FROM pacientes WHERE rut = %s",(rut,))
+    rut_int = rut_a_int(rut)
+    cursor.execute("SELECT * FROM pacientes WHERE rut = %s",(rut_int,))
+    if cursor.rowcount > 0:
+        row = cursor.fetchone()
+
+        rut_medico = None
+        if row[3]:
+            rut_medico = int_a_rut(row[3])
+        
+        paciente = Paciente(
+            nombre=row[1],
+            apellido=row[2],
+            rut=int_a_rut(row[0]),
+            medico_tratante=rut_medico,
+            cama=row[4]
+        )
+        return paciente
     return None
 
 
 @conexion_segura
 def obtener_pacientes(cursor=None) -> list[Paciente]:
-    all = cursor.execute("SELECT * FROM pacientes")
-    for row in all:
-        nombre, apellido, rut, rut_medico_tratante, id_cama = row
-        medico = obtener_medico_por_rut(rut_medico_tratante)
-        cama = obtener_cama_por_id(cama)
-        paciente = Paciente(nombre, apellido, rut, medico, cama)
+    cursor.execute("SELECT * FROM pacientes")
+    for row in cursor:
+        # Obtener médico tratante
+        rut_medico = None
+        if row[4]:
+            medico = obtener_medico_por_rut(row[4])
+            rut_medico = medico.rut if medico else None
+
+        yield Paciente(
+            nombre=row[1],
+            apellido=row[2],
+            rut=int_a_rut(row[0]),
+            medico_tratante=rut_medico,
+            cama=row[4]
+        )
     return []
 
 
 # Médicos
-@conexion_segura
 def guardar_medico(medico, cursor=None) -> None:
-    # m = obtener_medico_por_rut(medico.rut)
-    # if m:
-    #     cursor.execute("DELETE FROM medicos WHERE rut = %s", (m,))
-    # cursor.execute("INSERT INTO medicos (nombre, apellido, rut) VALUES (%s, %s, %s)", (medico.nombre, medico.apellido, medico.rut))
-    return None
-    
+   guardar_campos(
+        tabla = 'medicos',
+        datos = {
+            'rut': rut_a_int(medico.rut),
+            'nombre': medico.nombre,
+            'apellido': medico.apellido
+        }
+    )
+ 
 
-@conexion_segura
 def quitar_medico(medico, cursor=None) -> None:
-    m = obtener_medico_por_rut(medico.rut)
-    if m:
-        cursor.execute("DELETE FROM medicos WHERE rut = %s", (m,))
-    return None
+    borrar_fila('medicos', 'rut', rut_a_int(medico.rut))
+
 
 @conexion_segura
 def obtener_medico_por_rut(rut, cursor=None) -> Medico or None:
-    resultado = cursor.execute("SELECT * FROM medicos WHERE rut = %s",(rut,))
-    if resultado.rowcount > 0:
-        row = resultado.fetchone()
-        nombre, apellido, rut = row
-        return Medico(nombre, apellido, rut)
+    rut_int = rut_a_int(rut)
+    cursor.execute("SELECT * FROM medicos WHERE rut = %s",(rut_int,))
+    if cursor.rowcount > 0:
+        row = cursor.fetchone()
+        rut, nombre, apellido = row
+        return Medico(
+            nombre=nombre,
+            apellido=apellido,
+            rut=int_a_rut(rut)
+        )
+    return None
 
 
 @conexion_segura
 def obtener_medicos(cursor=None) -> list[Medico]:
-    # all = cursor.execute("SELECT * FROM medicos")
-    # if all.rowcount > 0: 
-    #     row = all.fetchone() 
-    #     while row is not None:
-    #         print('Nombre :',str(row[1]), '-Apellido :', str(row[2]), '-Rut; ',str(row[3]))
-    #         row = all.fetchone()
-    # else:
-    #     print('No existen registros en la base de datos')
+    cursor.execute("SELECT * FROM medicos")
+    for row in cursor:
+        rut, nombre, apellido = row
+        yield Medico(
+            nombre=nombre,
+            apellido=apellido,
+            rut=int_a_rut(rut)
+        )
     return []
 
 
 # Habitaciones
-@conexion_segura
 def guardar_habitacion(habitacion, cursor=None) -> None:
-    # h = obtener_habitacion_por_id(habitacion.id)
-    # if h:
-    #     cursor.execute("DELETE FROM habitaciones WHERE id_habitacion = %s", (h,))
-    # cursor.execute("INSERT INTO habitaciones (id_habitacion) VALUES (%s)", (habitacion.id))
-    return None
+    guardar_campos(
+        tabla = 'habitaciones',
+        datos = {
+            'id_habitacion': habitacion.id,
+            'camas_ids': habitacion.id_camas
+        }
+    )
 
 
 @conexion_segura
 def obtener_habitacion_por_id(id, cursor=None) -> Habitacion or None:
-    # select_filter_habitacion = cursor.execute("SELECT * FROM habitaciones WHERE id_habitacion = %s",(id,))
-    # if select_filter_habitacion.rowcount > 0:
-    #     row = select_filter_habitacion.fetchone()
-    #     while row is not None:
-    #         print('Habitacion :',str(row[0]))
-    #         row = select_filter_habitacion.fetchone()
-    # else:
-    #     print('No existen registros en la base de datos')
+    cursor.execute("SELECT * FROM habitaciones WHERE id_habitacion = %s",(id,))
+    if cursor.rowcount > 0:
+        row = cursor.fetchone()
+        return Habitacion(
+            id = row[0], 
+            id_camas = row[1]
+        )
     return None
 
 
 @conexion_segura
-def obtener_habitaciones(cursor=None):
-    all = cursor.execute("SELECT * FROM habitaciones")
-    if all.rowcount > 0: 
-        row = all.fetchone() 
-        while row is not None:
-            print('Habitacion :',str(row[0]))
-            row = all.fetchone()
-    else:
-        print('No existen registros en la base de datos')
+def obtener_habitaciones(cursor=None) -> list[Habitacion]:
+    cursor.execute("SELECT * FROM habitaciones")
+    for row in cursor:
+        yield Habitacion(row[0])
 
 
 # Camas
-def guardar_cama(cama):
-    c = obtener_cama_por_id(cama.id)
-    if c:
-        habitacion = obtener_habitacion_por_id(cama.habitacion.id)
-        habitacion.camas.remove(c)
-    habitacion = obtener_habitacion_por_id(cama.habitacion.id)
-    habitacion.agregar_cama(cama)
+def guardar_cama(cama, cursor=None) -> None:
+    guardar_campos(
+        tabla = 'camas',
+        datos = {
+            'id_cama': cama.id,
+            'disponible': cama.disponible,
+            'habitaciones_id': cama.id_habitacion
+        }
+    )
+
 
 @conexion_segura
 def obtener_cama_por_id(id, cursor=None) -> Cama or None:
-    # select_filter_cama = cursor.execute("SELECT * FROM camas WHERE id_cama = %s",(id,))
-    # if select_filter_cama.rowcount > 0:
-    #     row = select_filter_cama.fetchone()
-    #     while row is not None:
-    #         print('Cama :',str(row[0]),'disponible :',str(row[1]),'habitaciones_id :',str(row[2]))
-    #         row = select_filter_cama.fetchone()
-    # else:
-    #     print('No existen registros en la base de datos')
+    cursor.execute("SELECT * FROM camas WHERE id_cama = %s",(id,))
+    if cursor.rowcount > 0:
+        row = cursor.fetchone()
+        return Cama(row[0], row[1], row[2])
     return None
 
 
+@conexion_segura
 def obtener_camas() -> list[Cama]:
-    return []
+    cursor.execute("SELECT * FROM camas")
+    for row in cursor:
+        yield Cama(row[0], row[1], row[2])
 
 
+@conexion_segura
 def obtener_camas_disponibles() -> list[Cama]:
-    return []
-
-
-def obtener_una_cama_disponible() -> Cama or None:
-    return None
+    cursor.execute("SELECT * FROM camas WHERE disponible = TRUE")
+    for row in cursor:
+        yield Cama(row[0], row[1], row[2])
 
 
 # Exámenes
-def guardar_examen(examen) -> None:
-    return None
+def guardar_examen(examen) -> int or None:
+    guardar_campos(
+        tabla = 'examenes',
+        datos = {
+            'id_examen': examen.id,
+            'nombre': examen.nombre,
+            'resultado': examen.resultado,
+            'medicos_id': rut_a_int(examen.rut_medico),
+            'pacientes_id': rut_a_int(examen.rut_paciente),
+            'fecha': examen.fecha
+        }
+    )
 
 
+@conexion_segura
 def obtener_examen_por_id(id) -> Examen or None:
+    cursor.execute("SELECT * FROM examenes WHERE id_examen = %s",(id,))
+    if cursor.rowcount > 0:
+        return Examen(row[0], row[1], row[2], int_to_rut(row[3]), int_to_rut(row[4]), row[5])
     return None
 
 
+@conexion_segura
 def obtener_examenes_por_paciente(paciente, cursor=None) -> list[Examen]:
+    rut_paciente = rut_a_int(paciente.rut)
+    cursor.execute("SELECT * FROM examenes WHERE pacientes_id = %s",(rut_paciente,))
+    for row in cursor:
+        yield Examen(row[0], row[1], row[2], int_to_rut(row[3]), int_to_rut(row[4]), row[5])   
     return []
+
 
 @conexion_segura
 def obtener_examenes(cursor=None) -> list[Examen]:
-    # all = cursor.execute("SELECT * FROM medicos")
-    # if all.rowcount > 0: 
-    #     row = all.fetchone() 
-    #     while row is not None:
-    #         print('Nombre :',str(row[1]), '-Resultado :', str(row[2]), '-medicos_id; ',str(row[3]),'-pacientes_id; ',str(row[4],'-fecha; ',str(row[5])))
-    #         row = all.fetchone()
-    # else:
-    #     print('No existen registros en la base de datos')
+    cursor.execute("SELECT * FROM examenes")
+    for row in cursor:
+        yield Examen(row[0], row[1], row[2], int_to_rut(row[3]), int_to_rut(row[4]), row[5])
     return []
     
 
 # Diagnósticos
-@conexion_segura
 def guardar_diagnostico(diagnostico, cursor=None) -> None:
+    guardar_campos(
+        tabla = 'diagnosticos',
+        datos = {
+            'id_diagnostico': diagnostico.id,
+            'enfermedad': diagnostico.enfermedad,
+            'medicos_id': rut_a_int(diagnostico.rut_medico),
+            'pacientes_id': rut_a_int(diagnostico.rut_paciente),
+            'id_examenes': diagnostico.id_examenes
+        }
+    )
+
+
+def obtener_diagnostico_por_id(id, cursor=None) -> Diagnostico or None:
+    cursor.execute("SELECT * FROM diagnosticos WHERE id = %s",(id,))
+    if cursor.rowcount > 0:
+        row = cursor.fetchone()
+        return Diagnostico(
+            id=row[0],
+            rut_medico=int_to_rut(row[2]),
+            enfermedad=row[3],
+            rut_paciente=int_to_rut(row[1]),
+            id_examenes=row[4]
+        )
     return None
 
-def obtener_diagnostico_por_paciente(paciente, cursor=None) -> Diagnostico or None:
-    return None
+
+@conexion_segura
+def obtener_diagnosticos_por_paciente(paciente, cursor=None) -> list[Diagnostico]:
+    rut_paciente = rut_a_int(paciente.rut)
+    cursor.execute("SELECT * FROM diagnosticos WHERE pacientes_id = %s",(rut_paciente,))
+    if cursor.rowcount > 0:
+        yield Diagnostico(
+            id=row[0],
+            rut_medico=int_to_rut(row[2]),
+            enfermedad=row[3],
+            rut_paciente=int_to_rut(row[1]),
+            id_examenes=row[4]
+        )
+    return []
+
 
 @conexion_segura
 def obtener_diagnosticos(cursor=None) -> list[Diagnostico]:
-    # all = cursor.execute("SELECT * FROM medicos")
-    # if all.rowcount > 0: 
-    #     row = all.fetchone() 
-    #     while row is not None:
-    #         print('medicos_id :',str(row[1]), '-pacientes_id :', str(row[2]), '-enfermedad; ',str(row[3]))
-    #         row = all.fetchone()
-    # else:
-    #     print('No existen registros en la base de datos')
+    cursor.execute("SELECT * FROM diagnosticos")
+    for row in cursor:
+        yield Diagnostico(
+            id=row[0],
+            rut_medico=int_to_rut(row[2]),
+            enfermedad=row[3],
+            rut_paciente=int_to_rut(row[1]),
+            id_examenes=row[4]
+        )
     return []
