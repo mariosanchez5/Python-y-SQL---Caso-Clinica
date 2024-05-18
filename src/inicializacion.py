@@ -10,7 +10,9 @@ from src.repositorio_clinica import \
     guardar_cama, guardar_examen, guardar_diagnostico,\
     obtener_paciente_por_rut, obtener_medico_por_rut,\
     obtener_habitacion_por_id, obtener_cama_por_id,\
-    obtener_examen_por_id
+    obtener_examen_por_id, obtener_diagnostico_por_id,\
+    obtener_pacientes, obtener_medicos, obtener_habitaciones,\
+    obtener_camas, obtener_examenes, obtener_diagnosticos
 
 # Agregar datos de prueba
 def inicializar_datos():
@@ -61,11 +63,26 @@ def inicializar_datos():
             'ultimo_examen': None
         }
         guardar_paciente(Paciente(**paciente_a_agregar))
-    
+
+    # Testear si se agregaron correctamente
+    pacientes_agregados = obtener_pacientes()
+    for paciente in pacientes_agregados:
+        print(paciente.to_dict())
+
+    input("Presione enter para continuar")
+
+
     print("Agregando médicos...")
     # Agregar médicos
     for medico in medicos_a_agregar:
         guardar_medico(Medico(*medico))
+
+    # Testear si se agregaron correctamente
+    medicos_agregados = obtener_medicos()
+    for medico in medicos_agregados:
+        print(medico.to_dict())
+    
+    input("Presione enter para continuar")
 
     print("Asignando algunos médicos a pacientes...")
     # Asignar algunos pacientes a médicos
