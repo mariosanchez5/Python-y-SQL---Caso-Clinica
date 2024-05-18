@@ -3,25 +3,25 @@ class Medico:
         self.nombre = nombre
         self.apellido = apellido
         self.rut = rut
-        self.pacientes = pacientes.copy()
+        self.rut_pacientes = pacientes.copy()
 
     def agregar_paciente(self, paciente):
-        for p in self.pacientes:
-            if p.rut == paciente.rut:
+        for p in self.rut_pacientes:
+            if p == paciente.rut:
                 return
-        self.pacientes.append(paciente)
+        self.rut_pacientes.append(paciente.rut)
     
     def quitar_paciente(self, paciente):
         for p in self.pacientes:
             if p.rut == paciente.rut:
-                self.pacientes.remove(p)
+                self.rut_pacientes.remove(p)
 
     def to_dict(self):
         return {
             'nombre': self.nombre,
             'apellido': self.apellido,
             'rut': self.rut,
-            'rut_pacientes': [paciente.rut for paciente in self.pacientes]
+            'rut_pacientes': self.rut_pacientes
         }
 
     def nombre_completo(self):

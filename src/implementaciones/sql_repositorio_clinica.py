@@ -5,6 +5,7 @@ from src.medico import Medico
 from src.diagnostico import Diagnostico
 from src.cama import Cama
 from src.config import leer_config
+from src.auxiliares import rut_to_int, int_to_rut
 
 import os
 
@@ -105,13 +106,31 @@ cargar_schemas()
 def guardar_paciente(paciente, cursor=None) -> None:
     p = obtener_paciente_por_rut(paciente.rut)
     if p:
-        cursor.execute("DELETE FROM pacientes WHERE rut = %s", (p,))
-    cursor.execute(
-        "INSERT INTO pacientes (nombre, apellido, rut, medicos_id, camas_id) VALUES (%s, %s, %s, %s, %s)",
-         paciente.to_row()
+        cursor.execute("DELETE FROM pacientes WHERE rut = %s", (p.rut,))
+    # Conseguir datos necesarios 
+    rut_paciente = rut_to_int(paciente.rut)
+    
+    # Obtener id del médico tratante
+    if paciente.medico_tratante:
+        cursor.execute(
+            "SELECT id FROM medicos WHERE rut = %s",
+            (rut_to_int(paciente.medico_tratante.rut),)
+        )
+    id_medico = cursor.fetchone()[0]
+    # Obtener id de la cama
+
+    
+    fila_nueva = (
+        paciente.nombre,
+        paciente.apellido,
+        rut_paciente,
+        rut_to_int(paciente.medico_tratante.rut) if paciente.medico_tratante else None,
+        paciente.cama.id if paciente.cama else None
     )
-
-
+    cursor.execute(
+        "INSERT INTO pacientes (nombre, apellido, rut) VALUES (%s, %s, %s, %s, %s)",
+        fila_nueva
+    )
 @conexion_segura
 def quitar_paciente(paciente, cursor=None) -> None:
     return None
@@ -125,8 +144,13 @@ def obtener_paciente_por_rut(rut, cursor=None) -> Paciente or None:
 
 @conexion_segura
 def obtener_pacientes(cursor=None) -> list[Paciente]:
+    all = cursor.execute("SELECT * FROM pacientes")
+    for row in all:
+        nombre, apellido, rut, rut_medico_tratante, id_cama = row
+        medico = obtener_medico_por_rut(rut_medico_tratante)
+        cama = obtener_cama_por_id(cama)
+        paciente = Paciente(nombre, apellido, rut, medico, cama)
     return []
-
 
 
 # Médicos
@@ -148,15 +172,12 @@ def quitar_medico(medico, cursor=None) -> None:
 
 @conexion_segura
 def obtener_medico_por_rut(rut, cursor=None) -> Medico or None:
-    # select_filter_medico = cursor.execute("SELECT * FROM medicos WHERE rut = %s",(rut,))
-    # if select_filter_medico.rowcount > 0:
-    #     row = select_filter_medico.fetchone()
-    #     while row is not None:
-    #         print('Nombre :',str(row[1]), '-Apellido :', str(row[2]), '-Rut; ',str(row[3]))
-    #         row = select_filter_medico.fetchone()
-    # else:
-    #     print('No existen registros en la base de datos')
-    return None
+    resultado = cursor.execute("SELECT * FROM medicos WHERE rut = %s",(rut,))
+    if resultado.rowcount > 0:
+        row = resultado.fetchone()
+        nombre, apellido, rut = row
+        return Medico(nombre, apellido, rut)
+
 
 @conexion_segura
 def obtener_medicos(cursor=None) -> list[Medico]:

@@ -3,59 +3,39 @@ class Paciente:
         self.nombre = nombre
         self.apellido = apellido
         self.rut = rut
-        self.medico_tratante = medico_tratante
-        self.cama = cama
-        self.habitacion = None if cama is None else cama.habitacion
-        self.diagnosticos = diagnosticos.copy()
-        self.examenes = examenes.copy()
-        self.ultimo_examen = None
+        self.rut_medico_tratante = medico_tratante
+        self.id_cama = cama
+        self.id_habitacion = None if cama is None else cama.habitacion
+        self.id_diagnosticos = diagnosticos.copy()
+        self.id_examenes = examenes.copy()
+        self.id_ultimo_examen = None
 
     def agregar_diagnostico(self, diagnostico):
         self.diagnosticos.append(diagnostico)
 
     def agregar_examen(self, examen):
-        self.examenes.append(examen)
-        self.ultimo_examen = examen
+        self.examenes.append(examen.id)
+        self.id_ultimo_examen = examen.id
 
     def asignar_medico(self, medico):
-        self.medico_tratante = medico
+        self.rut_medico_tratante = medico.rut
 
     def asignar_cama(self, cama):
-        self.cama = cama
-        self.habitacion = cama.habitacion
+        self.id_cama = cama.id
+        self.id_habitacion = cama.id_habitacion
 
     def to_dict(self):
         return {
             'nombre': self.nombre,
             'apellido': self.apellido,
             'rut': self.rut,
-            'medico_tratante': self.medico_tratante.rut if self.medico_tratante else None,
-            'cama': self.cama.id if self.cama else None,
-            'habitacion': self.habitacion.id if self.habitacion else None,
-            'diagnosticos': [diagnostico.to_dict() for diagnostico in self.diagnosticos],
-            'examenes': [examen.to_dict() for examen in self.examenes],
-            'ultimo_examen': self.ultimo_examen.to_dict() if self.ultimo_examen else None
+            'medico_tratante': self.rut_medico_tratante if self.rut_medico_tratante else None,
+            'cama': self.id_cama if self.id_cama else None,
+            'habitacion': self.id_habitacion if self.id_habitacion else None,
+            'diagnosticos': self.id_diagnosticos,
+            'examenes': self.id_examenes,
+            'ultimo_examen': self.id_ultimo_examen if self.id_ultimo_examen else None
         }
-
-    def to_row(self):
-        # Adaptar a la estructura de la base de datos
-        return (
-            self.nombre,
-            self.apellido,
-            self.rut,
-            self.medico_tratante.rut if self.medico_tratante else None,
-            self.cama.id if self.cama else None
-        )
-    
-    def from_row(row):
-        # (id, nombre, apellido, rut, medico_tratante, cama)
-        return Paciente(
-            nombre=row[1], 
-            apellido=row[2], 
-            rut=row[3], 
-            medico_tratante=row[4], 
-            cama=row[5]
-        )
 
     # Redefinir el operador de igualdad
     def __eq__(self, other):

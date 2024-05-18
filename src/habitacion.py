@@ -1,22 +1,23 @@
 class Habitacion:
     def __init__(self, id, camas=[]):
-        self.camas = camas.copy() # Listado de objetos cama
+        self.id_camas = camas.copy()
         self.id = id
         self.disponible = False
 
     def agregar_cama(self, cama):
-        self.camas.append(cama)
+        self.id_camas.append(cama.id)
+
+    def quitar_cama(self, cama):
+        self.id_camas.remove(cama.id)
 
     def to_row(self):
-        id_camas = []
-        for cama in self.camas:
-            id_camas.append(cama.id)
         return (self.id, id_camas)
 
-    def imprimir():
-        print(f'Habitación: {self.id}')
-        for cama in self.camas:
-            print(f'Cama: {cama.id} - Disponible: {cama.disponible}')
-
     def from_row(row):
-        return None
+        return Habitacion(row[1], row[2])
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'camas': self.id_camas
+        }

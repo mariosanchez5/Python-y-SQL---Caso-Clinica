@@ -37,6 +37,7 @@ def inicializar_datos():
     
     habitaciones_a_agregar = [ 'A', 'B', 'C', 'D', 'E' ]
     
+    # Cada tupla contiene (id_cama, id_habitacion)
     camas_a_agregar = [(1, 2), (2, 0), (3, 4), (4, 1), (5, 3), (6, 0), (7, 2), (8, 1), (9, 4), (10, 0), 
                        (11, 3), (12, 2), (13, 1), (14, 0), (15, 4), (16, 3), (17, 2), (18, 1), (19, 0), 
                        (20, 4), (21, 3), (22, 2), (23, 1), (24, 0), (25, 4), (26, 3)
@@ -49,7 +50,17 @@ def inicializar_datos():
     print("Agregando pacientes...")
     # Agregar pacientes
     for paciente in pacientes_a_agregar:
-        guardar_paciente(Paciente(*paciente))
+        paciente_a_agregar = {
+            'nombre': paciente[0],
+            'apellido': paciente[1],
+            'rut': paciente[2],
+            'medico_tratante': None,
+            'cama': None,
+            'diagnosticos': [],
+            'examenes': [],
+            'ultimo_examen': None
+        }
+        guardar_paciente(Paciente(**paciente_a_agregar))
     
     print("Agregando médicos...")
     # Agregar médicos
@@ -96,14 +107,14 @@ def inicializar_datos():
         guardar_habitacion(Habitacion(habitacion))
 
     print("Agregando camas...")
-    # Crear camas y agregar aleatoriamente a las habitaciones
+    # Crear camas y agregar seudoaleatoriamente a las habitaciones
     for cama in camas_a_agregar:
         c = Cama(cama[0])
         hab = obtener_habitacion_por_id(habitaciones_a_agregar[cama[1]])
         if hab is None:
             mensaje_error("obtener_habitacion_por_id")
             break
-        c.habitacion = hab
+        c.asignar_habitacion(hab)
         hab.agregar_cama(c)
         guardar_cama(c)
         guardar_habitacion(hab)
@@ -120,6 +131,6 @@ def inicializar_datos():
             mensaje_error("obtener_cama_por_id")
             break
         p.asignar_cama(c)
-        c.ocupar()
+        c.ocupar(p)
         guardar_paciente(p)
         guardar_cama(c)

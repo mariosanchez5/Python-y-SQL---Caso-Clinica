@@ -9,7 +9,7 @@ habitaciones = []
 pacientes = []
 examenes = []
 medicos = []
-cama = []
+camas = []
 diagnosticos = []
 
 conexion = None
@@ -94,42 +94,39 @@ def obtener_habitaciones():
 def guardar_cama(cama):
     c = obtener_cama_por_id(cama.id)
     if c:
-        habitacion = obtener_habitacion_por_id(cama.habitacion.id)
-        habitacion.camas.remove(c)
-    habitacion = obtener_habitacion_por_id(cama.habitacion.id)
-    habitacion.agregar_cama(cama)
+        camas.remove(c)
+        habitacion = obtener_habitacion_por_id(cama.id_habitacion)
+        habitacion.quitar_cama(c)
+        guardar_habitacion(habitacion)
+    nueva_habitacion = obtener_habitacion_por_id(cama.id_habitacion)
+    nueva_habitacion.agregar_cama(cama)
+    guardar_habitacion(nueva_habitacion)
+    camas.append(cama)
 
 
 def obtener_cama_por_id(id):
-    for habitacion in habitaciones:
-        for cama in habitacion.camas:
-            if cama.id == id:
-                return cama
+    for cama in camas:
+        if cama.id == id:
+            return cama
     return None
 
 
 def obtener_camas():
-    camas = []
-    for habitacion in habitaciones:
-        for cama in habitacion.camas:
-            camas.append(cama)
     return camas
 
 
 def obtener_camas_disponibles():
-    camas = []
-    for habitacion in habitaciones:
-        for cama in habitacion.camas:
-            if cama.disponible:
-                camas.append(cama)
-    return camas
+    disponibles = []
+    for cama in camas:
+        if cama.disponible:
+            disponibles.append(cama)
+    return disponibles
 
 
 def obtener_una_cama_disponible():
-    for habitacion in habitaciones:
-        for cama in habitacion.camas:
-            if cama.disponible:
-                return cama
+    for cama in camas:
+        if cama.disponible:
+            return cama
     return None
 
 

@@ -33,9 +33,8 @@ def main():
             read = input("Presione enter para continuar")
         elif opcion == "5":
             crear_camas_y_habitaciones()
-            read = input("Presione enter para continuar")
         elif opcion == "6":
-            acciones_adicionales(mostrar_menu("Otras opciones", ["Ver médicos", "Ver camas", "Ver habitaciones", "Ver examenes", "Ver diagnósticos", "Volver atrás"], "Ingresa la opción deseada:"))
+            acciones_adicionales(mostrar_menu("Otras opciones", ["Ver médicos", "Ver camas", "Ver habitaciones", "Ver exámenes", "Ver diagnósticos", "Volver atrás"], "Ingresa la opción deseada: "))
         else:
             print("Hasta luego")
             break
@@ -58,7 +57,7 @@ def acciones_adicionales(opcion):
     else:
         print("Opción no válida")
     for r in resultado: print(r.to_dict())
-    read = input("Presione enter para continuar")
+    input("Presione enter para continuar")
     limpiar_pantalla()
 
 

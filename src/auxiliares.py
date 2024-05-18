@@ -72,3 +72,12 @@ def mostrar_tabla(columnas, filas):
 def limpiar_pantalla():
     for i in range(100):
         print()
+
+
+def int_a_rut(numero):
+    rut = str(numero)
+    return rut[:-1] + "-" + rut[-1]
+
+
+def rut_a_int(rut):
+    return int(rut.replace("-", "").replace(".", ""))
