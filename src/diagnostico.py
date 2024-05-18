@@ -1,5 +1,6 @@
 class Diagnostico:
-    def __init__(self, medico, enfermedad, paciente, examenes):
+    def __init__(self, id, medico, enfermedad, paciente, examenes):
+        self.id = id
         self.enfermedad = enfermedad
         self.id_examenes = examenes
         self.rut_paciente = paciente
@@ -7,6 +8,7 @@ class Diagnostico:
     
     def to_dict(self):
         return {
+            'id': self.id,
             'medico': self.rut_medico,
             'enfermedad': self.enfermedad,
             'paciente': self.rut_paciente,
