@@ -75,9 +75,29 @@ def limpiar_pantalla():
 
 
 def int_a_rut(numero):
+    if numero is None: return None
     rut = str(numero)
-    return rut[:-1] + "-" + rut[-1]
+    # Calcula el dígito verificador
+    # usando módulo 11
+    suma = 0
+    multiplicador = 2
+    for i in range(1, len(rut) + 1):
+        suma += int(rut[-i]) * multiplicador
+        multiplicador += 1
+        if multiplicador > 7:
+            multiplicador = 2
+    dv = 11 - (suma % 11)
+    # Agregar puntos
+    rut_con_puntos = ""
+    for indice, digito in enumerate(rut[::-1]):
+        if indice % 3 == 0 and indice > 0:
+            rut_con_puntos += "."
+        rut_con_puntos += digito
+    return rut_con_puntos[::-1] + "-" + ("K" if dv == 10 else str(dv))
 
 
 def rut_a_int(rut):
-    return int(rut.replace("-", "").replace(".", ""))
+    if rut is None: return None
+    rut_sin_dv = rut[:-2]
+    sin_puntos = rut_sin_dv.replace(".", "")
+    return int(sin_puntos)
