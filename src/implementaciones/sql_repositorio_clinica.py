@@ -4,13 +4,15 @@ from src.examen import Examen
 from src.medico import Medico
 from src.diagnostico import Diagnostico
 from src.cama import Cama
-import psycopg2
-import config
+from src.config import config
 
+import psycopg2
 
 ########################
 # Gestión de la conexión
 conexion = None
+db_config = config.postgresql
+
 
 def obtener_conexion():
     if conexion is None:

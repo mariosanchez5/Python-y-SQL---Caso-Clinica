@@ -1,0 +1,7 @@
+repositorio: 'sql'
+postgres:
+  host: 'localhost'
+  port: '5432'
+  dbname: 'clinica'
+  user: 'postgres'
+  password: 'example'
