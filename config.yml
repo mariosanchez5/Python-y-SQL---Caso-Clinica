@@ -1,7 +1,11 @@
 repositorio: 'sql'
-postgres:
-  host: 'localhost'
-  port: '5432'
-  dbname: 'clinica'
-  user: 'postgres'
-  password: 'example'
+sql:
+  conexion:
+    host: '192.168.20.15'
+    port: '5432'
+    dbname: 'clinica'
+    user: 'postgres'
+    password: 'example'
+  schemas_dir: 'schemas'
+  schemas: 
+    - 'clinica'
