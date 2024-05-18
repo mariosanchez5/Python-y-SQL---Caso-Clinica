@@ -41,57 +41,85 @@ def inicializar_datos():
                        (11, 3), (12, 2), (13, 1), (14, 0), (15, 4), (16, 3), (17, 2), (18, 1), (19, 0), 
                        (20, 4), (21, 3), (22, 2), (23, 1), (24, 0), (25, 4), (26, 3)
     ]
+
+    def mensaje_error(funcion):
+        print(f"El método {funcion} no está implementado, o está devolviendo None a todo evento.")
     
+    print("Inicializando datos de prueba...")
+    print("Agregando pacientes...")
     # Agregar pacientes
     for paciente in pacientes_a_agregar:
         guardar_paciente(Paciente(*paciente))
     
+    print("Agregando médicos...")
     # Agregar médicos
     for medico in medicos_a_agregar:
         guardar_medico(Medico(*medico))
 
+    print("Asignando algunos médicos a pacientes...")
     # Asignar algunos pacientes a médicos
     # Los primeros 2 pacientes al primer médico
     medico = obtener_medico_por_rut(medicos_a_agregar[0][2])
     for paciente in pacientes_a_agregar[:2]:
+        if medico is None:
+            mensaje_error("obtener_medico_por_rut")
+            break
         p = obtener_paciente_por_rut(paciente[2])
-        p.asignar_medico(medico)
-        medico.agregar_paciente(p)
-        guardar_paciente(p)
-        guardar_medico(medico)
+        if p:
+            p.asignar_medico(medico)
+            medico.agregar_paciente(p)
+            guardar_paciente(p)
+            guardar_medico(medico)
+        else:
+            mensaje_error("obtener_paciente_por_rut")
+            break
     # Los siguientes 2 pacientes al segundo médico
     medico = obtener_medico_por_rut(medicos_a_agregar[1][2])
     for paciente in pacientes_a_agregar[2:4]:
+        if medico is None:
+            mensaje_error("obtener_medico_por_rut")
+            break
         p = obtener_paciente_por_rut(paciente[2])
-        p.asignar_medico(medico)
-        medico.agregar_paciente(p)
-        guardar_paciente(p)
-        guardar_medico(medico)
+        if p:
+            p.asignar_medico(medico)
+            medico.agregar_paciente(p)
+            guardar_paciente(p)
+            guardar_medico(medico)
+        else:
+            mensaje_error("obtener_paciente_por_rut")
+            break
 
-    
+    print("Agregando habitaciones...")    
     # Agregar habitaciones
     for habitacion in habitaciones_a_agregar:
         h = Habitacion(habitacion, [])
         guardar_habitacion(Habitacion(habitacion))
 
+    print("Agregando camas...")
     # Crear camas y agregar aleatoriamente a las habitaciones
     for cama in camas_a_agregar:
         c = Cama(cama[0])
-        hab = obtener_habitacion_por_id(habitaciones_a_agregar[cama[1]])  
+        hab = obtener_habitacion_por_id(habitaciones_a_agregar[cama[1]])
+        if hab is None:
+            mensaje_error("obtener_habitacion_por_id")
+            break
         c.habitacion = hab
         hab.agregar_cama(c)
         guardar_cama(c)
         guardar_habitacion(hab)
 
+    print("Asignando camas a pacientes...")
     # Asignar camas a pacientes
     for i, paciente in enumerate(pacientes_a_agregar):
         p = obtener_paciente_por_rut(paciente[2])
+        if p is None:
+            mensaje_error("obtener_paciente_por_rut")
+            break
         c = obtener_cama_por_id(i+1)
+        if c is None:
+            mensaje_error("obtener_cama_por_id")
+            break
         p.asignar_cama(c)
         c.ocupar()
         guardar_paciente(p)
         guardar_cama(c)
-
-
-
-
