@@ -252,7 +252,7 @@ def obtener_habitacion_por_id(id, cursor=None) -> Habitacion or None:
         row = cursor.fetchone()
         return Habitacion(
             id = row[0], 
-            id_camas = row[1]
+            camas = row[1]
         )
     return None
 
