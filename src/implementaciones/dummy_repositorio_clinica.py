@@ -12,6 +12,8 @@ medicos = []
 cama = []
 diagnosticos = []
 
+conexion = None
+
 # Pacientes
 def guardar_paciente(paciente):
     p = obtener_paciente_por_rut(paciente.rut)
