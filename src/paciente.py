@@ -22,22 +22,17 @@ class Paciente:
         self.medico_tratante = medico
         self.medico_tratante.agregar_paciente(self)
 
-    def imprimir_paciente(self):
-        print(f'Nombre: {self.nombre} - Apellido: {self.apellido} - Rut: {self.rut} - Médico tratante: {self.medico_tratante.nombre_completo()} - Cama: {self.cama}')
-        if self.diagnosticos:
-            print('Diagnósticos:')
-            for diagnostico in self.diagnosticos:
-                print(f'{diagnostico}')
-        else:
-            print('No hay diagnosticos')
-        if self.examenes:
-            print('Exámenes:')
-            for examen in self.examenes:
-                print(f'{examen}')
-        else:
-            print('No hay exámenes')
-        if self.ultimo_examen:
-            print(f'Último examen: {self.ultimo_examen}')
+    def to_dict(self):
+        return {
+            'nombre': self.nombre,
+            'apellido': self.apellido,
+            'rut': self.rut,
+            'medico_tratante': self.medico_tratante.rut if self.medico_tratante else None,
+            'cama': self.cama,
+            'diagnosticos': [diagnostico.to_dict() for diagnostico in self.diagnosticos],
+            'examenes': [examen.to_dict() for examen in self.examenes],
+            'ultimo_examen': self.ultimo_examen.to_dict() if self.ultimo_examen else None
+        }
 
     def to_row(self):
         return (self.nombre, self.apellido, self.rut, self.medico_tratante, self.cama)

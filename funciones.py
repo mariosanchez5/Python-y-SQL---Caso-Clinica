@@ -1,12 +1,42 @@
-from clases import *
-from models import *
+from src.dummy_repositorio_clinica import *
+from src.inicializacion import *
 
-def MostrarTodos():
-    VerTodosPacientes()
+inicializar_datos()
 
-def MostrasUnPaciente():
-    rut = input("Ingrese el Rut del paciente sin puntos con guion: ")
-    FiltrarPacientes(rut)
+def mostrar_pacientes():
+    pacientes = obtener_pacientes()
+    for paciente in pacientes:
+        print(paciente.to_dict())
+
+
+def mostrar_paciente_por_rut():
+    rut = input("Ingrese el RUT del paciente sin puntos con guión: ")
+    paciente = obtener_paciente_por_rut(rut)
+    if paciente:
+        print(paciente.to_dict())
+    else:
+        print("Paciente no encontrado")
+
+def cambiar_paciente_cama():
+    rut = input("Ingrese el RUT del paciente sin puntos con guión: ")
+    paciente = obtener_paciente_por_rut(rut)
+    # Caso 1: Paciente no existe
+    if not paciente:
+        print("Paciente no encontrado")
+        return
+    # Caso 2: Paciente existe y no tiene cama
+    if not paciente.cama:        
+        print("Paciente no tiene cama asignada.")
+        id_cama = int(input("Ingrese el ID de la cama: "))
+        paciente.cama = id_cama
+    # Caso 3: Paciente existe y tiene cama
+    else:
+        id_cama = int(input("Ingrese el nuevo ID de la nueva cama: "))
+        # Desasignar cama
+        
+    else:
+        print("Paciente no encontrado")
+
 
 def CambiarCama():
     #Por ahora lo dejaremos simple
@@ -31,3 +61,14 @@ def CrearCamaYHabitacion():
         CrearHabitaciones(ncamas2,zona)
     else:
         print('Opción incorrecta')
+    
+def validar_rut(rut):
+    rut = rut.replace(".", "")
+    rut = rut.replace("-", "")
+    if len(rut) < 8:
+        return False
+    try:
+        int(rut[:-1])
+    except:
+        return False
+    return True

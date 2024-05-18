@@ -10,14 +10,13 @@ class Medico:
     def quitar_paciente(self, paciente):
         self.pacientes.remove(paciente)
 
-    def imprimir_medico(self):
-        print(f'Nombre: {self.nombre} - Apellido: {self.apellido} - Rut: {self.rut}')
-        if self.pacientes:
-            print('Pacientes:')
-            for paciente in self.pacientes:
-                print(f'{paciente.nombre} {paciente.apellido}')
-        else:
-            print('No tiene pacientes')
+    def to_dict(self):
+        return {
+            'nombre': self.nombre,
+            'apellido': self.apellido,
+            'rut': self.rut,
+            'rut_pacientes': [paciente.rut for paciente in self.pacientes]
+        }
 
     def nombre_completo(self):
         return f'{self.nombre} {self.apellido}'

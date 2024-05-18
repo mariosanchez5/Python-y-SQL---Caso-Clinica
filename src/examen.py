@@ -17,5 +17,15 @@ class Examen:
         print(f'Nombre: {self.nombre}')
         print(f'Resultado: {self.resultado}')
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nombre': self.nombre,
+            'resultado': self.resultado,
+            'medico': self.medico.rut,
+            'paciente': self.paciente.rut,
+            'fecha': self.fecha
+        }
+
     def to_row(self):
         return (self.id, self.nombre, self.resultado, self.medico, self.paciente, self.fecha)
