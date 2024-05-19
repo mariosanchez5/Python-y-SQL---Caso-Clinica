@@ -216,7 +216,7 @@ def obtener_pacientes_por_rut_medico(rut_medico, cursor=None) -> list[Paciente]:
             apellido=apellido,
             rut=int_a_rut(rut),
             medico_tratante=rut_medico,
-            cama=camas_id
+            cama=obtener_cama_por_id(camas_id)
         )
     return []
 

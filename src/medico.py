@@ -12,8 +12,8 @@ class Medico:
         self.rut_pacientes.append(paciente.rut)
     
     def quitar_paciente(self, paciente):
-        for p in self.pacientes:
-            if p.rut == paciente.rut:
+        for p in self.rut_pacientes:
+            if p == paciente.rut:
                 self.rut_pacientes.remove(p)
 
     def to_dict(self):
