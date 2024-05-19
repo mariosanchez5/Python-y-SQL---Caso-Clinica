@@ -8,7 +8,7 @@ class Paciente:
         self.id_habitacion = cama.id_habitacion if cama else None
         self.id_diagnosticos = diagnosticos.copy()
         self.id_examenes = examenes.copy()
-        self.id_ultimo_examen = None
+        self.id_ultimo_examen = ultimo_examen
 
     def agregar_diagnostico(self, diagnostico):
         self.diagnosticos.append(diagnostico)

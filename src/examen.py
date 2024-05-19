@@ -1,7 +1,7 @@
 from datetime import datetime
 
 class Examen:
-    def __init__(self, id, nombre, resultado, medico, prediagnostico, paciente, fecha=datetime.now()):
+    def __init__(self, id, nombre, resultado, prediagnostico, medico, paciente, fecha=datetime.now()):
         self.id = id
         self.nombre = nombre
         self.resultado = resultado

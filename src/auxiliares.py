@@ -101,3 +101,10 @@ def rut_a_int(rut):
     rut_sin_dv = rut[:-2]
     sin_puntos = rut_sin_dv.replace(".", "")
     return int(sin_puntos)
+
+def eliminar_puntos_guiones_a_entero(rut):
+    numero_sin_formato = rut.replace(".", "").replace("-", "")
+    # Convertir la cadena a entero
+    numero_entero = int(numero_sin_formato)
+    
+    return numero_entero
