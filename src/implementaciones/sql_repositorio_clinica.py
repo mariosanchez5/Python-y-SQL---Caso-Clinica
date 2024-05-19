@@ -363,6 +363,7 @@ def guardar_examen(examen) -> int or None:
             'id_examen': examen.id,
             'nombre': examen.nombre,
             'resultado': examen.resultado,
+            'prediagnostico': examen.prediagnostico,
             'medicos_id': rut_a_int(examen.rut_medico),
             'pacientes_id': rut_a_int(examen.rut_paciente),
             'fecha': examen.fecha
@@ -384,7 +385,15 @@ def obtener_examenes_por_paciente(paciente, cursor=None) -> list[Examen]:
     rut_paciente = rut_a_int(paciente.rut)
     cursor.execute("SELECT * FROM examenes WHERE pacientes_id = %s",(rut_paciente,))
     for row in cursor:
-        yield Examen(row[0], row[1], row[2], int_a_rut(row[3]), int_a_rut(row[4]), row[5])   
+        yield Examen(
+            id=row[0],
+            nombre=row[1],
+            resultado=row[2],
+            prediagnostico=row[3],
+            rut_medico=int_a_rut(row[4]),
+            rut_paciente=int_a_rut(row[5]),
+            fecha=row[6]
+        )  
     return []
 
 
@@ -392,7 +401,15 @@ def obtener_examenes_por_paciente(paciente, cursor=None) -> list[Examen]:
 def obtener_examenes(cursor=None) -> list[Examen]:
     cursor.execute("SELECT * FROM examenes")
     for row in cursor:
-        yield Examen(row[0], row[1], row[2], int_a_rut(row[3]), int_a_rut(row[4]), row[5])
+        yield Examen(
+            id=row[0],
+            nombre=row[1],
+            resultado=row[2],
+            prediagnostico=row[3],
+            rut_medico=int_a_rut(row[4]),
+            rut_paciente=int_a_rut(row[5]),
+            fecha=row[6]
+        )
     return []
     
 
