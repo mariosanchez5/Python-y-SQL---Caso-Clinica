@@ -106,7 +106,8 @@ def cambiar_paciente_medico():
 
 def crear_cama():
     habitacion = solicitar_habitacion_por_id()
-    camas = obtener_camas()
+    if not habitacion: return
+    camas = list(obtener_camas())
     cama = Cama(len(camas) + 1) # ID de cama correlativo
     cama.asignar_habitacion(habitacion)
     guardar_cama(cama)
@@ -135,13 +136,14 @@ def cambiar_cama_habitacion():
     if not habitacion_destino: return
     # Hasta acá se ha validado que la cama y la habitación existen
     habitacion_actual = obtener_habitacion_por_id(cama.id_habitacion)
+    print(habitacion_actual.to_dict())
     habitacion_actual.quitar_cama(cama)
     guardar_habitacion(habitacion_actual)
     # Cama libre   
     cama.asignar_habitacion(habitacion_destino)
     habitacion_destino.agregar_cama(cama)
     if not cama.disponible:
-        paciente = obtener_paciente_por_rut(cama.rut_paciente)
+        paciente = obtener_paciente_por_cama(cama)
         # Se reasigna la cama al paciente para actualizar la habitación
         paciente.asignar_cama(cama)
         guardar_paciente(paciente)

@@ -4,8 +4,8 @@ class Paciente:
         self.apellido = apellido
         self.rut = rut
         self.rut_medico_tratante = medico_tratante
-        self.id_cama = cama
-        self.id_habitacion = None if cama is None else cama.habitacion
+        self.id_cama = cama.id if cama else None
+        self.id_habitacion = cama.id_habitacion if cama else None
         self.id_diagnosticos = diagnosticos.copy()
         self.id_examenes = examenes.copy()
         self.id_ultimo_examen = None

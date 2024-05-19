@@ -23,16 +23,9 @@ def guardar_paciente(paciente):
 
 
 def quitar_paciente(paciente):
-    # Desasignar paciente de cama
-    for habitacion in habitaciones:
-        if paciente.cama in habitacion.camas:
-            habitacion.camas.remove(paciente.cama)
-    # Desasignar paciente de médico
-    if paciente.medico_tratante:
-        for medico in medicos:
-            if medico == paciente.medico_tratante:
-                medico.quitar_paciente(paciente)
-    pacientes.remove(paciente)
+    for p in pacientes:
+        if p == paciente:
+            pacientes.remove(paciente)
 
 
 def obtener_paciente_por_rut(rut):
@@ -95,12 +88,6 @@ def guardar_cama(cama):
     c = obtener_cama_por_id(cama.id)
     if c:
         camas.remove(c)
-        habitacion = obtener_habitacion_por_id(cama.id_habitacion)
-        habitacion.quitar_cama(c)
-        guardar_habitacion(habitacion)
-    nueva_habitacion = obtener_habitacion_por_id(cama.id_habitacion)
-    nueva_habitacion.agregar_cama(cama)
-    guardar_habitacion(nueva_habitacion)
     camas.append(cama)
 
 
@@ -128,6 +115,13 @@ def obtener_una_cama_disponible():
         if cama.disponible:
             return cama
     return None
+
+
+def obtener_paciente_por_cama(cama):
+    for paciente in pacientes:
+        if paciente.id_cama == cama.id:
+            return paciente
+    return None 
 
 
 # Exámenes

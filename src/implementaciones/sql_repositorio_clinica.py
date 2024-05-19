@@ -164,7 +164,7 @@ def obtener_paciente_por_rut(rut, cursor=None) -> Paciente or None:
             apellido=row[2],
             rut=int_a_rut(row[0]),
             medico_tratante=rut_medico,
-            cama=row[4]
+            cama=obtener_cama_por_id(row[4])
         )
         return paciente
     return None
@@ -185,7 +185,7 @@ def obtener_pacientes(cursor=None) -> list[Paciente]:
             apellido=row[2],
             rut=int_a_rut(row[0]),
             medico_tratante=rut_medico,
-            cama=row[4]
+            cama=obtener_cama_por_id(row[4])
         )
     return []
 
@@ -266,6 +266,12 @@ def guardar_habitacion(habitacion, cursor=None) -> None:
         }
     )
 
+@conexion_segura
+def obtener_camas_por_habitacion(habitacion, cursor=None) -> list[Cama]:
+    cursor.execute("SELECT * FROM camas WHERE habitaciones_id = %s",(habitacion.id,))
+    for row in cursor:
+        yield Cama(row[0], row[1], row[2])
+
 
 @conexion_segura
 def obtener_habitacion_por_id(id, cursor=None) -> Habitacion or None:
@@ -273,14 +279,11 @@ def obtener_habitacion_por_id(id, cursor=None) -> Habitacion or None:
     if cursor.rowcount > 0:
         row = cursor.fetchone()
         id = row[0]
-        cursor.execute("SELECT * FROM camas WHERE habitaciones_id = %s",(id,))
-        camas = []
-        for row in cursor:
-            camas.append(row[0])
-        return Habitacion(
-            id = row[0],
-            camas = camas
-        )
+        hab = Habitacion(id)
+        camas = list(obtener_camas_por_habitacion(hab))
+        camas = [cama.id for cama in camas]
+        hab.id_camas = camas
+        return hab
     return None
 
 
@@ -289,15 +292,12 @@ def obtener_habitaciones(cursor=None) -> list[Habitacion]:
     cursor.execute("SELECT * FROM habitaciones")
     for row in cursor:
         id = row[0]
-        cursor.execute("SELECT * FROM camas WHERE habitaciones_id = %s",(id,))
-        camas = []
-        for row in cursor:
-            camas.append(row[0])
-        
-        yield Habitacion(
-            id,
-            camas
-        )
+        hab = Habitacion(id)
+        camas = list(obtener_camas_por_habitacion(hab))
+        camas = [cama.id for cama in camas]
+        hab.id_camas = camas
+
+        yield hab
 
 
 # Camas
@@ -334,6 +334,20 @@ def obtener_camas_disponibles(cursor=None) -> list[Cama]:
     for row in cursor:
         yield Cama(row[0], row[1], row[2])
 
+@conexion_segura
+def obtener_paciente_por_cama(cama, cursor=None) -> Paciente or None:
+    cursor.execute("SELECT * FROM pacientes WHERE camas_id = %s",(cama.id,))
+    if cursor.rowcount > 0:
+        row = cursor.fetchone()
+        rut, nombre, apellido, medicos_id, camas_id = row
+        return Paciente(
+            nombre=nombre,
+            apellido=apellido,
+            rut=int_a_rut(rut),
+            medico_tratante=int_a_rut(medicos_id),
+            cama=cama
+        )
+    return None
 
 # Exámenes
 def guardar_examen(examen) -> int or None:
@@ -409,14 +423,15 @@ def obtener_diagnosticos_por_paciente(paciente, cursor=None) -> list[Diagnostico
     rut_paciente = rut_a_int(paciente.rut)
     cursor.execute("SELECT * FROM diagnosticos WHERE pacientes_id = %s",(rut_paciente,))
     if cursor.rowcount > 0:
-        yield Diagnostico(
-            id=row[0],
-            rut_medico=int_a_rut(row[2]),
-            enfermedad=row[3],
-            rut_paciente=int_a_rut(row[1]),
-            id_examenes=row[4]
-        )
-    return []
+        for row in cursor:
+            yield Diagnostico(
+                id=row[0],
+                rut_medico=int_a_rut(row[2]),
+                enfermedad=row[3],
+                rut_paciente=int_a_rut(row[1]),
+                id_examenes=row[4]
+            )
+    yield []
 
 
 @conexion_segura
