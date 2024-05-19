@@ -216,7 +216,6 @@ def inicializar_datos():
             resultado = examen[3],
             prediagnostico = examen[1]
         )
-        print(e.to_dict())
         paciente.agregar_examen(e)
         guardar_examen(e)
         guardar_paciente(paciente)
@@ -224,7 +223,6 @@ def inicializar_datos():
     pacientes_con_examenes = obtener_pacientes()
     for paciente in pacientes_con_examenes:
         print(paciente.to_dict())
-        print()
     
     input("Presione enter para continuar")
 

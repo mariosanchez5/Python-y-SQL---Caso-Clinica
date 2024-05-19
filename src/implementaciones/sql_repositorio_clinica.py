@@ -100,6 +100,7 @@ def cargar_schemas(cursor=None):
 verificar_db_existente()
 cargar_schemas()
 
+
 @conexion_segura
 def guardar_campos(tabla, datos, cursor=None):
     campos = list(datos.keys())
@@ -129,9 +130,8 @@ def guardar_campos(tabla, datos, cursor=None):
 @conexion_segura
 def borrar_fila(tabla, llave, valor, cursor=None):
     cursor.execute(f"DELETE FROM {tabla} WHERE {llave} = %s", (valor,))
+
 ########################################
-
-
 # Pacientes
 def guardar_paciente(paciente) -> None:
     guardar_campos(
@@ -145,51 +145,71 @@ def guardar_paciente(paciente) -> None:
         }
     )
 
-
 @conexion_segura
 def quitar_paciente(paciente, cursor=None) -> None:
     borrar_fila('pacientes', 'rut', rut_a_int(paciente.rut))
 
+
 @conexion_segura
-def obtener_examen_por_paciente(rut_int, cursor=None) -> Examen:
+def obtener_ultimo_examen_por_rut_paciente(rut, cursor=None) -> Examen:
+    rut_int = rut_a_int(rut)
     cursor.execute(f"SELECT * FROM examenes JOIN pacientes ON pacientes_id = pacientes.rut WHERE pacientes_id = {rut_int} ORDER BY examenes.fecha DESC LIMIT 1")
     row = cursor.fetchone()
-    return row
+    if row:
+        return Examen(
+            id=row[0],
+            nombre=row[1],
+            resultado=row[2],
+            prediagnostico=row[3],
+            medico=row[4],
+            paciente=row[5],
+            fecha=row[6]
+        )
+    return None
+
+
+@conexion_segura
+def obtener_examenes_por_rut_paciente(rut, cursor=None) -> list[Examen]:
+    rut_int = rut_a_int(rut)
+    cursor.execute(f"SELECT * FROM examenes where pacientes_id = {rut_int}")
+    for row in cursor:
+        yield Examen(
+            id=row[0],
+            nombre=row[1],
+            resultado=row[2],
+            prediagnostico=row[3],
+            medico=row[4],
+            paciente=row[5],
+            fecha=row[6]
+        )
+    return []
 
 @conexion_segura
 def obtener_paciente_por_rut(rut, cursor=None) -> Paciente or None:
     rut_int = rut_a_int(rut)
+    examen_obtenido = obtener_ultimo_examen_por_rut_paciente(rut)
+    examenes = [e.id for e in obtener_examenes_por_rut_paciente(rut)]
     cursor.execute("SELECT * FROM pacientes WHERE rut = %s",(rut_int,))
-    #cursor.execute(f"SELECT * FROM pacientes JOIN examenes ON pacientes.rut = examenes.pacientes_id WHERE rut = {rut_int}")
-    #cursor.execute("SELECT pacientes.nombre, pacientes.apellido, pacientes.rut, pacientes.medicos_id, pacientes.camas_id, examenes.id_examen FROM examenes JOIN pacientes ON pacientes_id = pacientes.rut WHERE pacientes_id = %s ORDER BY examenes.fecha DESC LIMIT 1",(rut_int,))
-    #cursor.execute("SELECT pacientes.nombre, pacientes.apellido, pacientes.rut, pacientes.medicos_id, pacientes.camas_id FROM examenes JOIN pacientes ON pacientes_id = pacientes.rut WHERE pacientes_id = %s ORDER BY examenes.fecha DESC LIMIT 1",(rut_int,))
     if cursor.rowcount > 0:
         row = cursor.fetchone()
 
         rut_medico = None
         if row[3]:
             rut_medico = int_a_rut(row[3])
-        #cursor.execute(f"SELECT examenes.id_examen, examenes.resultado FROM examenes JOIN pacientes ON pacientes_id = pacientes.rut WHERE pacientes_id = {rut_int} ORDER BY examenes.fecha DESC LIMIT 1")
-        #cursor.execute(f"SELECT * FROM examenes JOIN pacientes ON pacientes_id = pacientes.rut WHERE pacientes_id = {rut_int} ORDER BY examenes.fecha DESC LIMIT 1")
-        #examenes = cursor.fetchone()
-        examen_tuple= obtener_examen_por_paciente(rut_int)
+
+        # Si no hay examen, se asigna None
+        examen = None
+        if examen_obtenido:
+            examen = examen_obtenido.id
         
-        # examen = Examen(
-        #     id=examen_tuple[0],
-        #     nombre=examen_tuple[1],
-        #     resultado=examen_tuple[2],
-        #     prediagnostico=examen_tuple[3],
-        #     medico=examen_tuple[4],
-        #     paciente=examen_tuple[5],
-        #     fecha=examen_tuple[6]
-        # )
         paciente = Paciente(
             nombre=row[1],
             apellido=row[2],
             rut=int_a_rut(row[0]),
             medico_tratante=rut_medico,
             cama=obtener_cama_por_id(row[4]),
-            ultimo_examen=examen_tuple
+            examenes=examenes,
+            ultimo_examen=examen
         )
         
         return paciente
@@ -198,22 +218,22 @@ def obtener_paciente_por_rut(rut, cursor=None) -> Paciente or None:
 
 @conexion_segura
 def obtener_pacientes(cursor=None) -> list[Paciente]:
-    #cursor.execute("SELECT * FROM pacientes")
     cursor.execute("SELECT * FROM pacientes JOIN examenes ON examenes.pacientes_id = pacientes.rut")
     for row in cursor:
         # Obtener médico tratante
         rut_medico = None
-    
         if row[3]:
             rut_medico = int_a_rut(row[3])
-
+        if row[5]:
+            examen = obtener_examen_por_id(row[5])
         paciente = Paciente(
             nombre=row[1],
             apellido=row[2],
             rut=int_a_rut(row[0]),
             medico_tratante=rut_medico,
             cama=obtener_cama_por_id(row[4]),
-            examenes=[row[5]]
+            examenes=[],
+            ultimo_examen=examen.id
         )
         diagnosticos = obtener_diagnosticos_por_paciente(paciente)
         paciente.diagnosticos = diagnosticos
