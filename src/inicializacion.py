@@ -48,7 +48,7 @@ def inicializar_datos():
         print(f"El método {funcion} no está implementado, o está devolviendo None a todo evento.")
     
     print("Inicializando datos de prueba...")
-    print("Agregando pacientes...")
+
     # Agregar pacientes
     for paciente in pacientes_a_agregar:
         paciente_a_agregar = {
@@ -63,15 +63,7 @@ def inicializar_datos():
         }
         guardar_paciente(Paciente(**paciente_a_agregar))
 
-    # Testear si se agregaron correctamente
-    pacientes_agregados = obtener_pacientes()
-    for paciente in pacientes_agregados:
-        print(paciente.to_dict())
 
-    input("Presione enter para continuar")
-
-
-    print("Agregando médicos...")
     # Agregar médicos
     for medico in medicos_a_agregar:
         guardar_medico(
@@ -81,15 +73,7 @@ def inicializar_datos():
                 rut=medico[2], 
                 pacientes=[]
         ))
-
-    # Testear si se agregaron correctamente
-    medicos_agregados = obtener_medicos()
-    for medico in medicos_agregados:
-        print(medico.to_dict())
     
-    input("Presione enter para continuar")
-
-    print("Asignando algunos médicos a pacientes...")
     # Asignar algunos pacientes a médicos
     # Los primeros 2 pacientes al primer médico
     medico = obtener_medico_por_rut(medicos_a_agregar[0][2])
@@ -121,34 +105,13 @@ def inicializar_datos():
         else:
             mensaje_error("obtener_paciente_por_rut")
             break
-    
-    # Testear si se asignaron correctamente
-    pacientes_agregados = obtener_pacientes()
-    for paciente in pacientes_agregados:
-        print(paciente.to_dict())
-
-    input("Presione enter para continuar")
-
-    medicos_agregados = obtener_medicos()
-    for medico in medicos_agregados:
-        print(medico.to_dict())
-
-    input("Presione enter para continuar")
-
-    print("Agregando habitaciones...")    
+   
     # Agregar habitaciones
     for habitacion in habitaciones_a_agregar:
         h = Habitacion(habitacion, [])
         guardar_habitacion(h)
 
-    # Testear si se agregaron correctamente
-    habitaciones_agregadas = obtener_habitaciones()
-    for habitacion in habitaciones_agregadas:
-        print(habitacion.to_dict())
 
-    input("Presione enter para continuar")
-
-    print("Agregando camas...")
     # Crear camas y agregar seudoaleatoriamente a las habitaciones
     for cama in camas_a_agregar:
         c = Cama(cama[0])
@@ -161,14 +124,6 @@ def inicializar_datos():
         guardar_cama(c)
         guardar_habitacion(hab)
 
-    # Testear si se agregaron correctamente
-    camas_agregadas = obtener_camas()
-    for cama in camas_agregadas:
-        print(cama.to_dict())
-
-    input("Presione enter para continuar")
-
-    print("Asignando camas a pacientes...")
     # Asignar camas a pacientes
     for i, paciente in enumerate(pacientes_a_agregar):
         p = obtener_paciente_por_rut(paciente[2])
@@ -183,7 +138,6 @@ def inicializar_datos():
         c.ocupar(p)
         guardar_paciente(p)
         guardar_cama(c)
-    
-    # Testear si se asignaron correctamente
-    for paciente in pacientes_agregados:
-        print(paciente.to_dict())
+
+    print("Datos de prueba inicializados!")
+    print()
