@@ -354,7 +354,8 @@ def guardar_examen(examen) -> int or None:
 def obtener_examen_por_id(id, cursor=None) -> Examen or None:
     cursor.execute("SELECT * FROM examenes WHERE id_examen = %s",(id,))
     if cursor.rowcount > 0:
-        return Examen(row[0], row[1], row[2], int_to_rut(row[3]), int_to_rut(row[4]), row[5])
+        row = cursor.fetchone()
+        return Examen(row[0], row[1], row[2], int_a_rut(row[3]), int_a_rut(row[4]), row[5])
     return None
 
 
@@ -363,7 +364,7 @@ def obtener_examenes_por_paciente(paciente, cursor=None) -> list[Examen]:
     rut_paciente = rut_a_int(paciente.rut)
     cursor.execute("SELECT * FROM examenes WHERE pacientes_id = %s",(rut_paciente,))
     for row in cursor:
-        yield Examen(row[0], row[1], row[2], int_to_rut(row[3]), int_to_rut(row[4]), row[5])   
+        yield Examen(row[0], row[1], row[2], int_a_rut(row[3]), int_a_rut(row[4]), row[5])   
     return []
 
 
@@ -371,7 +372,7 @@ def obtener_examenes_por_paciente(paciente, cursor=None) -> list[Examen]:
 def obtener_examenes(cursor=None) -> list[Examen]:
     cursor.execute("SELECT * FROM examenes")
     for row in cursor:
-        yield Examen(row[0], row[1], row[2], int_to_rut(row[3]), int_to_rut(row[4]), row[5])
+        yield Examen(row[0], row[1], row[2], int_a_rut(row[3]), int_a_rut(row[4]), row[5])
     return []
     
 
@@ -395,9 +396,9 @@ def obtener_diagnostico_por_id(id, cursor=None) -> Diagnostico or None:
         row = cursor.fetchone()
         return Diagnostico(
             id=row[0],
-            rut_medico=int_to_rut(row[2]),
+            rut_medico=int_a_rut(row[2]),
             enfermedad=row[3],
-            rut_paciente=int_to_rut(row[1]),
+            rut_paciente=int_a_rut(row[1]),
             id_examenes=row[4]
         )
     return None
@@ -410,9 +411,9 @@ def obtener_diagnosticos_por_paciente(paciente, cursor=None) -> list[Diagnostico
     if cursor.rowcount > 0:
         yield Diagnostico(
             id=row[0],
-            rut_medico=int_to_rut(row[2]),
+            rut_medico=int_a_rut(row[2]),
             enfermedad=row[3],
-            rut_paciente=int_to_rut(row[1]),
+            rut_paciente=int_a_rut(row[1]),
             id_examenes=row[4]
         )
     return []
@@ -424,9 +425,9 @@ def obtener_diagnosticos(cursor=None) -> list[Diagnostico]:
     for row in cursor:
         yield Diagnostico(
             id=row[0],
-            rut_medico=int_to_rut(row[2]),
+            rut_medico=int_a_rut(row[2]),
             enfermedad=row[3],
-            rut_paciente=int_to_rut(row[1]),
+            rut_paciente=int_a_rut(row[1]),
             id_examenes=row[4]
         )
     return []
