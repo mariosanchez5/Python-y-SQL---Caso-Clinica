@@ -47,6 +47,7 @@ def obtener_conexion():
         )
     return conexion    
 
+
 # Decorador para manejar la conexión segura
 def conexion_segura(func):
     def wrapper(*args, **kwargs):
@@ -86,6 +87,7 @@ def verificar_db_existente():
     cursor.execute(f"CREATE DATABASE {dbname}")
     conexion.commit()
     conexion.close()
+
 
 @conexion_segura
 def cargar_schemas(cursor=None):
@@ -142,6 +144,7 @@ def guardar_paciente(paciente) -> None:
             'camas_id': paciente.id_cama
         }
     )
+
 
 @conexion_segura
 def quitar_paciente(paciente, cursor=None) -> None:
@@ -205,6 +208,7 @@ def guardar_medico(medico) -> None:
 def quitar_medico(medico) -> None:
     borrar_fila('medicos', 'rut', rut_a_int(medico.rut))
 
+
 @conexion_segura
 def obtener_pacientes_por_rut_medico(rut_medico, cursor=None) -> list[Paciente]:
     medicos_id = rut_a_int(rut_medico)
@@ -219,6 +223,7 @@ def obtener_pacientes_por_rut_medico(rut_medico, cursor=None) -> list[Paciente]:
             cama=obtener_cama_por_id(camas_id)
         )
     return []
+
 
 @conexion_segura
 def obtener_medico_por_rut(rut, cursor=None) -> Medico or None:
@@ -265,6 +270,7 @@ def guardar_habitacion(habitacion, cursor=None) -> None:
             'id_habitacion': habitacion.id,
         }
     )
+
 
 @conexion_segura
 def obtener_camas_por_habitacion(habitacion, cursor=None) -> list[Cama]:

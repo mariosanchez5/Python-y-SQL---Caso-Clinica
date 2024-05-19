@@ -36,6 +36,7 @@ CREATE TABLE examenes (
     resultado VARCHAR(100),
     medicos_id INT,
     pacientes_id INT,
+    prediagnostico VARCHAR(100),
     FOREIGN KEY (medicos_id) REFERENCES medicos(rut),
     FOREIGN KEY (pacientes_id) REFERENCES pacientes(rut),
     fecha DATE

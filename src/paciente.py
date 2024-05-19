@@ -14,7 +14,7 @@ class Paciente:
         self.diagnosticos.append(diagnostico)
 
     def agregar_examen(self, examen):
-        self.examenes.append(examen.id)
+        self.id_examenes.append(examen.id)
         self.id_ultimo_examen = examen.id
 
     def asignar_medico(self, medico):

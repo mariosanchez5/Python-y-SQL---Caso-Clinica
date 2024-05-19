@@ -33,15 +33,22 @@ def inicializar_datos():
         ("Felipe", "Martínez", "2020202-2"),
         ("Carmen", "Rodríguez", "3030303-3"),
         ("Jorge", "López", "4040404-4"),
-        ("Mónica", "García", "5050505-5")
+        ("Mónica", "García", "5050505-5"),
+        ("Andrés", "Fernández", "6060606-6"),
+        ("María", "Ruiz", "7070707-7"),
+        ("Juan", "González", "8080808-8"),
+        ("Carolina", "Martínez", "9090909-9"),
+        ("Pedro", "Rodríguez", "10101010-0")
     ]
     
-    habitaciones_a_agregar = [ 'A', 'B', 'C', 'D', 'E' ]
+    habitaciones_a_agregar = [ 'A', 'B', 'C', 'D', 'E',
+                                'F', 'G', 'H', 'I', 'J']
     
     # Cada tupla contiene (id_cama, id_habitacion)
     camas_a_agregar = [(1, 2), (2, 0), (3, 4), (4, 1), (5, 3), (6, 0), (7, 2), (8, 1), (9, 4), (10, 0), 
-                       (11, 3), (12, 2), (13, 1), (14, 0), (15, 4), (16, 3), (17, 2), (18, 1), (19, 0), 
-                       (20, 4), (21, 3), (22, 2), (23, 1), (24, 0), (25, 4), (26, 3)
+                       (11, 3), (12, 2), (13, 1), (14, 0), (15, 4), (16, 3), (17, 2), (18, 1), (19, 0),
+                       (20, 4), (21, 3), (22, 2), (23, 1), (24, 0), (25, 4), (26, 3), (27, 2), (28, 1),
+                       (29, 0), (30, 4), (31, 3), (32, 2), (33, 1), (34, 0), (35, 4), (36, 3), (37, 2)
     ]
 
     def mensaje_error(funcion):
@@ -106,6 +113,22 @@ def inicializar_datos():
             mensaje_error("obtener_paciente_por_rut")
             break
    
+    # Los siguientes pacientes, uno a cada médico
+    for i, paciente in enumerate(pacientes_a_agregar[4:]):
+        medico = obtener_medico_por_rut(medicos_a_agregar[i+2][2])
+        if medico is None:
+            mensaje_error("obtener_medico_por_rut")
+            break
+        p = obtener_paciente_por_rut(paciente[2])
+        if p:
+            p.asignar_medico(medico)
+            medico.agregar_paciente(p)
+            guardar_paciente(p)
+            guardar_medico(medico)
+        else:
+            mensaje_error("obtener_paciente_por_rut")
+            break
+
     # Agregar habitaciones
     for habitacion in habitaciones_a_agregar:
         h = Habitacion(habitacion, [])
@@ -124,7 +147,7 @@ def inicializar_datos():
         guardar_cama(c)
         guardar_habitacion(hab)
 
-    # Asignar camas a pacientes
+    # Asignar camas a todos los pacientes
     for i, paciente in enumerate(pacientes_a_agregar):
         p = obtener_paciente_por_rut(paciente[2])
         if p is None:
@@ -138,6 +161,65 @@ def inicializar_datos():
         c.ocupar(p)
         guardar_paciente(p)
         guardar_cama(c)
+
+    # Agregar exámenes
+    global contador_examenes
+    contador_examenes = 0
+    def generar_examen(paciente, nombre, resultado, prediagnostico):
+        global contador_examenes
+        contador_examenes += 1
+        return Examen(
+            id=contador_examenes,
+            paciente=paciente.rut,
+            nombre=nombre,
+            resultado=resultado,
+            medico=paciente.rut_medico_tratante,
+            prediagnostico=prediagnostico
+        )
+
+    examenes_a_agregar = [
+        # (índice paciente, prediagnóstico, nombre, resultado)
+        (0, "Diabetes", "Examen de sangre", "Normal"),
+        (5, "Intoxicación", "Examen de orina", "Anormal"),
+        (7, "Infección", "Examen de sangre", "Anormal"),
+        (9, "Gripe", "Examen de sangre", "Normal"),
+        (2, "Gastritis", "Endoscopía", "Anormal"),
+        (4, "Neumonía", "Radiografía", "Anormal"),
+        (1, "Anemia", "Examen de sangre", "Anormal"),
+        (6, "Covid-19", "PCR", "Normal"),
+        (8, "Intoxicación", "Examen de orina", "Normal"),
+        (3, "Gastritis", "Endoscopía", "Normal")
+    ]
+
+    for examen in examenes_a_agregar:
+        paciente = obtener_paciente_por_rut(pacientes_a_agregar[examen[0]][2])
+        if paciente is None:
+            mensaje_error("obtener_paciente_por_rut")
+            break
+        e = generar_examen(
+            paciente = paciente,
+            nombre = examen[2],
+            resultado = examen[3],
+            prediagnostico = examen[1]
+        )
+        print(e.to_dict())
+        paciente.agregar_examen(e)
+        guardar_examen(e)
+        guardar_paciente(paciente)
+
+    pacientes_con_examenes = obtener_pacientes()
+    for paciente in pacientes_con_examenes:
+        print(paciente.to_dict())
+        print()
+    
+    input("Presione enter para continuar")
+
+
+
+
+
+    # Agregar diagnósticos
+
 
     print("Datos de prueba inicializados!")
     print()

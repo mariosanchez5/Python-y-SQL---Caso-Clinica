@@ -1,20 +1,21 @@
 from datetime import datetime
 
 class Examen:
-    def __init__(self, id, nombre, resultado, medico, paciente, fecha=datetime.now()):
+    def __init__(self, id, nombre, resultado, medico, prediagnostico, paciente, fecha=datetime.now()):
         self.id = id
         self.nombre = nombre
         self.resultado = resultado
         self.rut_medico = medico
         self.rut_paciente = paciente
         self.fecha = fecha
+        self.prediagnostico = prediagnostico
 
     def to_dict(self):
         return {
             'id': self.id,
             'nombre': self.nombre,
             'resultado': self.resultado,
-            'medico': rut_medico,
+            'medico': self.rut_medico,
             'paciente': self.rut_paciente,
             'fecha': self.fecha
         }
