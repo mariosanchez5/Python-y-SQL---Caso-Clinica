@@ -100,12 +100,12 @@ cargar_schemas()
 
 @conexion_segura
 def guardar_campos(tabla, datos, cursor=None):
-    campos = datos.keys()
-    valores = datos.values()
+    campos = list(datos.keys())
+    valores = list(datos.values())
     campos_str = ', '.join(campos)
     valores_str = ', '.join(['%s'] * len(valores))
     # Asumir el primer campo como la llave primaria
-    llave = list(campos)[0]
+    llave = campos[0]
     # Buscar si ya existe
     cursor.execute(f"SELECT * FROM {tabla} WHERE {llave} = %s", (datos[llave],))
     if cursor.rowcount > 0:
@@ -176,9 +176,9 @@ def obtener_pacientes(cursor=None) -> list[Paciente]:
     for row in cursor:
         # Obtener médico tratante
         rut_medico = None
-        if row[4]:
-            medico = obtener_medico_por_rut(row[4])
-            rut_medico = medico.rut if medico else None
+    
+        if row[3]:
+            rut_medico = int_a_rut(row[3])
 
         yield Paciente(
             nombre=row[1],
@@ -191,7 +191,7 @@ def obtener_pacientes(cursor=None) -> list[Paciente]:
 
 
 # Médicos
-def guardar_medico(medico, cursor=None) -> None:
+def guardar_medico(medico) -> None:
    guardar_campos(
         tabla = 'medicos',
         datos = {
@@ -202,21 +202,38 @@ def guardar_medico(medico, cursor=None) -> None:
     )
  
 
-def quitar_medico(medico, cursor=None) -> None:
+def quitar_medico(medico) -> None:
     borrar_fila('medicos', 'rut', rut_a_int(medico.rut))
 
+@conexion_segura
+def obtener_pacientes_por_rut_medico(rut_medico, cursor=None) -> list[Paciente]:
+    medicos_id = rut_a_int(rut_medico)
+    cursor.execute("SELECT * FROM pacientes WHERE medicos_id = %s",(medicos_id,))
+    for row in cursor:
+        rut, nombre, apellido, _ , camas_id = row
+        yield Paciente(
+            nombre=nombre,
+            apellido=apellido,
+            rut=int_a_rut(rut),
+            medico_tratante=rut_medico,
+            cama=camas_id
+        )
+    return []
 
 @conexion_segura
 def obtener_medico_por_rut(rut, cursor=None) -> Medico or None:
     rut_int = rut_a_int(rut)
+    pacientes = [ p.rut for p in obtener_pacientes_por_rut_medico(rut) ]
     cursor.execute("SELECT * FROM medicos WHERE rut = %s",(rut_int,))
     if cursor.rowcount > 0:
         row = cursor.fetchone()
         rut, nombre, apellido = row
+        
         return Medico(
             nombre=nombre,
             apellido=apellido,
-            rut=int_a_rut(rut)
+            rut=int_a_rut(rut),
+            pacientes=pacientes
         )
     return None
 
@@ -226,10 +243,16 @@ def obtener_medicos(cursor=None) -> list[Medico]:
     cursor.execute("SELECT * FROM medicos")
     for row in cursor:
         rut, nombre, apellido = row
-        yield Medico(
-            nombre=nombre,
-            apellido=apellido,
-            rut=int_a_rut(rut)
+        rut_real = int_a_rut(rut)
+        pacientes = [ p.rut for p in obtener_pacientes_por_rut_medico(rut_real) ]
+        
+        yield(
+            Medico(
+                nombre=nombre,
+                apellido=apellido,
+                rut=int_a_rut(rut),
+                pacientes=pacientes
+            )
         )
     return []
 
@@ -240,7 +263,6 @@ def guardar_habitacion(habitacion, cursor=None) -> None:
         tabla = 'habitaciones',
         datos = {
             'id_habitacion': habitacion.id,
-            'camas_ids': habitacion.id_camas
         }
     )
 
@@ -250,9 +272,14 @@ def obtener_habitacion_por_id(id, cursor=None) -> Habitacion or None:
     cursor.execute("SELECT * FROM habitaciones WHERE id_habitacion = %s",(id,))
     if cursor.rowcount > 0:
         row = cursor.fetchone()
+        id = row[0]
+        cursor.execute("SELECT * FROM camas WHERE habitaciones_id = %s",(id,))
+        camas = []
+        for row in cursor:
+            camas.append(row[0])
         return Habitacion(
-            id = row[0], 
-            camas = row[1]
+            id = row[0],
+            camas = camas
         )
     return None
 
@@ -261,7 +288,16 @@ def obtener_habitacion_por_id(id, cursor=None) -> Habitacion or None:
 def obtener_habitaciones(cursor=None) -> list[Habitacion]:
     cursor.execute("SELECT * FROM habitaciones")
     for row in cursor:
-        yield Habitacion(row[0])
+        id = row[0]
+        cursor.execute("SELECT * FROM camas WHERE habitaciones_id = %s",(id,))
+        camas = []
+        for row in cursor:
+            camas.append(row[0])
+        
+        yield Habitacion(
+            id,
+            camas
+        )
 
 
 # Camas

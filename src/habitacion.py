@@ -2,7 +2,6 @@ class Habitacion:
     def __init__(self, id, camas=[]):
         self.id_camas = camas.copy()
         self.id = id
-        self.disponible = False
 
     def agregar_cama(self, cama):
         self.id_camas.append(cama.id)

@@ -9,15 +9,14 @@ from src.repositorio_clinica import \
     guardar_paciente, guardar_medico, guardar_habitacion,\
     guardar_cama, guardar_examen, guardar_diagnostico,\
     obtener_paciente_por_rut, obtener_medico_por_rut,\
-    obtener_habitacion_por_id, obtener_cama_por_id,\
-    obtener_examen_por_id, obtener_diagnostico_por_id,\
     obtener_pacientes, obtener_medicos, obtener_habitaciones,\
-    obtener_camas, obtener_examenes, obtener_diagnosticos
+    obtener_camas, obtener_examenes, obtener_diagnosticos,\
+    obtener_habitacion_por_id, obtener_cama_por_id
 
 # Agregar datos de prueba
 def inicializar_datos():
     pacientes_a_agregar = [
-        ("Juan", "Pérez", "1111111-1"),
+        ("Juan", "Pérez", "11111111-1"),
         ("María", "Gómez", "2222222-2"),
         ("Pedro", "Rodríguez", "3333333-3"),
         ("Ana", "Martínez", "4444444-4"),
@@ -75,7 +74,13 @@ def inicializar_datos():
     print("Agregando médicos...")
     # Agregar médicos
     for medico in medicos_a_agregar:
-        guardar_medico(Medico(*medico))
+        guardar_medico(
+            Medico(
+                nombre=medico[0], 
+                apellido=medico[1], 
+                rut=medico[2], 
+                pacientes=[]
+        ))
 
     # Testear si se agregaron correctamente
     medicos_agregados = obtener_medicos()
@@ -116,12 +121,32 @@ def inicializar_datos():
         else:
             mensaje_error("obtener_paciente_por_rut")
             break
+    
+    # Testear si se asignaron correctamente
+    pacientes_agregados = obtener_pacientes()
+    for paciente in pacientes_agregados:
+        print(paciente.to_dict())
+
+    input("Presione enter para continuar")
+
+    medicos_agregados = obtener_medicos()
+    for medico in medicos_agregados:
+        print(medico.to_dict())
+
+    input("Presione enter para continuar")
 
     print("Agregando habitaciones...")    
     # Agregar habitaciones
     for habitacion in habitaciones_a_agregar:
         h = Habitacion(habitacion, [])
-        guardar_habitacion(Habitacion(habitacion))
+        guardar_habitacion(h)
+
+    # Testear si se agregaron correctamente
+    habitaciones_agregadas = obtener_habitaciones()
+    for habitacion in habitaciones_agregadas:
+        print(habitacion.to_dict())
+
+    input("Presione enter para continuar")
 
     print("Agregando camas...")
     # Crear camas y agregar seudoaleatoriamente a las habitaciones
@@ -135,6 +160,13 @@ def inicializar_datos():
         hab.agregar_cama(c)
         guardar_cama(c)
         guardar_habitacion(hab)
+
+    # Testear si se agregaron correctamente
+    camas_agregadas = obtener_camas()
+    for cama in camas_agregadas:
+        print(cama.to_dict())
+
+    input("Presione enter para continuar")
 
     print("Asignando camas a pacientes...")
     # Asignar camas a pacientes
@@ -151,3 +183,7 @@ def inicializar_datos():
         c.ocupar(p)
         guardar_paciente(p)
         guardar_cama(c)
+    
+    # Testear si se asignaron correctamente
+    for paciente in pacientes_agregados:
+        print(paciente.to_dict())

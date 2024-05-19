@@ -1,6 +1,5 @@
 CREATE TABLE habitaciones (
-    id_habitacion VARCHAR(50) PRIMARY KEY,
-    camas_ids INT[]
+    id_habitacion VARCHAR(50) PRIMARY KEY
 );
 
 
