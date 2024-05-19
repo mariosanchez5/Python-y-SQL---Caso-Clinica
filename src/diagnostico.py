@@ -12,7 +12,7 @@ class Diagnostico:
             'medico': self.rut_medico,
             'enfermedad': self.enfermedad,
             'paciente': self.rut_paciente,
-            'examenes': id_examenes
+            'examenes': self.id_examenes
         }
 
     def to_row(self):

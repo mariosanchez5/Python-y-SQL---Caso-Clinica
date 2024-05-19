@@ -11,7 +11,7 @@ from src.repositorio_clinica import \
     obtener_paciente_por_rut, obtener_medico_por_rut,\
     obtener_pacientes, obtener_medicos, obtener_habitaciones,\
     obtener_camas, obtener_examenes, obtener_diagnosticos,\
-    obtener_habitacion_por_id, obtener_cama_por_id
+    obtener_habitacion_por_id, obtener_cama_por_id, obtener_examenes_por_paciente
 
 # Agregar datos de prueba
 def inicializar_datos():
@@ -228,12 +228,51 @@ def inicializar_datos():
     
     input("Presione enter para continuar")
 
-
-
-
+    global contador_diagnosticos
+    contador_diagnosticos = 0
+    
+    def siguiente_diagnostico(examenes_por_revisar):
+        global contador_diagnosticos
+        contador_diagnosticos += 1
+        anomalos = [ i for i in examenes_paciente if i.resultado == "Anormal" ]
+        for e in anomalos:
+            # Eliminar el examen actual de la lista de exámenes por revisar
+            for r in examenes_por_revisar:
+                if e.id == r.id:
+                    examenes_por_revisar.remove(r)
+                    break
+            # Buscar exámenes relacionados con la enfermedad
+            examenes_diagnostico = []
+            enfermedad = e.prediagnostico
+            for i in examenes_por_revisar:
+                if i.prediagnostico == enfermedad:
+                    examenes_diagnostico.append(i).id
+                    examenes_por_revisar.remove(i)
+            # Retornar diagnóstico: (id, enfermedad, [id_examenes])
+            yield (contador_diagnosticos, enfermedad, examenes_diagnostico) 
 
     # Agregar diagnósticos
+    for paciente in pacientes_a_agregar:
+        p = obtener_paciente_por_rut(paciente[2])
+        if p is None:
+            mensaje_error("obtener_paciente_por_rut")
+            break
 
+        diagnosticos_paciente = []
+        examenes_paciente = list(obtener_examenes_por_paciente(p))
+        examenes_por_revisar = examenes_paciente.copy()
+        for d in siguiente_diagnostico(examenes_por_revisar):
+            diagnostico = Diagnostico(
+                id=d[0],
+                medico=p.rut_medico_tratante,
+                enfermedad=d[1],
+                paciente=p.rut,
+                examenes=d[2]
+            )
+            diagnosticos_paciente.append(diagnostico)
+            guardar_diagnostico(diagnostico)
+
+        guardar_paciente(p)
 
     print("Datos de prueba inicializados!")
     print()
