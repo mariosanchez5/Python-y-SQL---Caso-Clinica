@@ -142,7 +142,7 @@ def obtener_examen_por_id(id):
 def obtener_examenes_por_paciente(paciente):
     examenes_paciente = []
     for examen in examenes:
-        if examen.paciente == paciente:
+        if examen.rut_paciente == paciente.rut:
             examenes_paciente.append(examen)
     return examenes_paciente
 
@@ -152,16 +152,23 @@ def obtener_examenes():
 
 # Diagnósticos
 def guardar_diagnostico(diagnostico):
-    d = obtener_diagnostico_por_paciente(diagnostico.paciente)
+    d = obtener_diagnostico_por_id(diagnostico.id)
     if d:
         diagnosticos.remove(d)
     diagnosticos.append(diagnostico)
 
 
-def obtener_diagnostico_por_paciente(paciente):
+def obtener_diagnostico_por_id(id):
     for diagnostico in diagnosticos:
-        if diagnostico.paciente == paciente:
+        if diagnostico.id == id:
             return diagnostico
+    return None
+
+
+def obtener_diagnosticos_por_paciente(paciente):
+    for diagnostico in diagnosticos:
+        if diagnostico.rut_paciente == paciente.rut:
+            yield diagnostico
     return None
 
 
