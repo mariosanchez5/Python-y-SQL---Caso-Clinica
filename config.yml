@@ -5,7 +5,7 @@ sql:
     port: '5432'
     dbname: 'clinica'
     user: 'postgres'
-    password: 'example'
+    password: 'richard1357'
   schemas_dir: 'schemas'
   schemas: 
     - 'clinica'

@@ -218,24 +218,33 @@ def obtener_paciente_por_rut(rut, cursor=None) -> Paciente or None:
 
 @conexion_segura
 def obtener_pacientes(cursor=None) -> list[Paciente]:
-    examenes = [(e.id, e.rut_paciente) for e in obtener_examenes()]
-    print([e for e in examenes])
-    cursor.execute("SELECT * FROM pacientes JOIN examenes ON examenes.pacientes_id = pacientes.rut")
+    #examenes = [(e.id, e.rut_paciente) for e in obtener_examenes()]
+    #print([e for e in examenes])
+    #cursor.execute("SELECT * FROM pacientes JOIN examenes ON examenes.pacientes_id = pacientes.rut")
+    cursor.execute("""
+                SELECT pacientes.rut,pacientes.nombre,pacientes.apellido,pacientes.medicos_id,pacientes.camas_id,
+                ARRAY_AGG(examenes.id_examen ORDER BY examenes.fecha DESC) AS examenes_agrupados,
+                ARRAY_AGG(camas.habitaciones_id) AS habitaciones_agrupadas
+                FROM pacientes JOIN camas ON camas_id = camas.id_cama 
+                JOIN examenes ON rut = examenes.pacientes_id
+                GROUP BY pacientes.rut
+                """ )
     for row in cursor:
         # Obtener médico tratante
         rut_medico = None
         if row[3]:
             rut_medico = int_a_rut(row[3])
-        if row[5]:
-            examen = obtener_examen_por_id(row[5])
+        # if row[5]:
+        #     examen = obtener_examen_por_id(row[5])
         paciente = Paciente(
             nombre=row[1],
             apellido=row[2],
             rut=int_a_rut(row[0]),
             medico_tratante=rut_medico,
             cama=obtener_cama_por_id(row[4]),
-            examenes=[ e[0] for e in examenes if e[1] == int_a_rut(row[0]) ],
-            ultimo_examen=examen.id
+            #examenes=[ e[0] for e in examenes if e[1] == int_a_rut(row[0]) ],
+            examenes=row[5],
+            ultimo_examen=max(row[5])
         )
         diagnosticos = obtener_diagnosticos_por_paciente(paciente)
         paciente.diagnosticos = diagnosticos

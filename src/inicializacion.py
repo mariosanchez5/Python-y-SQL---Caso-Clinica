@@ -4,6 +4,7 @@ from src.habitacion import Habitacion
 from src.cama import Cama
 from src.examen import Examen
 from src.diagnostico import Diagnostico
+from datetime import datetime
 
 from src.repositorio_clinica import \
     guardar_paciente, guardar_medico, guardar_habitacion,\
@@ -174,7 +175,8 @@ def inicializar_datos():
             nombre=nombre,
             resultado=resultado,
             medico=paciente.rut_medico_tratante,
-            prediagnostico=prediagnostico
+            prediagnostico=prediagnostico,
+            fecha=datetime.now()
         )
 
     examenes_a_agregar = [
