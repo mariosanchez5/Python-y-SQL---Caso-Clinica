@@ -241,7 +241,7 @@ def inicializar_datos():
             # Buscar exámenes relacionados con la enfermedad
             examenes_diagnostico = [e.id]
             enfermedad = e.prediagnostico
-            print(f"Paciente: {e.rut_paciente}, Enfermedad: {enfermedad}")
+            #print(f"Paciente: {e.rut_paciente}, Enfermedad: {enfermedad}")
             for i in examenes_por_revisar:
                 if i.prediagnostico == enfermedad:
                     examenes_diagnostico.append(i.id)
@@ -261,7 +261,7 @@ def inicializar_datos():
         examenes_paciente = list(obtener_examenes_por_paciente(p))
         examenes_por_revisar = examenes_paciente.copy()
         for d in siguiente_diagnostico(examenes_por_revisar):
-            print(f"Diagnóstico: {d[0]}, Enfermedad: {d[1]}, Examenes: {d[2]}")
+            #print(f"Diagnóstico: {d[0]}, Enfermedad: {d[1]}, Examenes: {d[2]}")
             diagnostico = Diagnostico(
                 id=d[0],
                 medico=p.rut_medico_tratante,
