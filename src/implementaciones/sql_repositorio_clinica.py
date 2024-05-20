@@ -218,6 +218,8 @@ def obtener_paciente_por_rut(rut, cursor=None) -> Paciente or None:
 
 @conexion_segura
 def obtener_pacientes(cursor=None) -> list[Paciente]:
+    examenes = [(e.id, e.rut_paciente) for e in obtener_examenes()]
+    print([e for e in examenes])
     cursor.execute("SELECT * FROM pacientes JOIN examenes ON examenes.pacientes_id = pacientes.rut")
     for row in cursor:
         # Obtener médico tratante
@@ -232,7 +234,7 @@ def obtener_pacientes(cursor=None) -> list[Paciente]:
             rut=int_a_rut(row[0]),
             medico_tratante=rut_medico,
             cama=obtener_cama_por_id(row[4]),
-            examenes=[],
+            examenes=[ e[0] for e in examenes if e[1] == int_a_rut(row[0]) ],
             ultimo_examen=examen.id
         )
         diagnosticos = obtener_diagnosticos_por_paciente(paciente)
