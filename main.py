@@ -13,8 +13,7 @@ def main():
                          "Otras acciones",
                          "Salir"]
     
-    titulo = "Gestión hospitalaria"
-    
+    titulo = "Sistema de gestión hospitalaria"
     
     while True: 
         opcion = mostrar_menu(titulo, opciones_validas, "Ingrese el número de la opción deseada: ")
@@ -43,20 +42,20 @@ def main():
 
 def acciones_adicionales(opcion):
     if opcion == "1":
-        resultado = obtener_medicos()
+        resultado = mostrar_medicos()
     elif opcion == "2":
-        resultado = obtener_camas()
+        resultado = mostrar_camas()
     elif opcion == "3":
-        resultado = obtener_habitaciones()
+        resultado = mostrar_habitaciones()
     elif opcion == "4":
-        resultado = obtener_examenes()
+        resultado = mostrar_examenes()
     elif opcion == "5":
-        resultado = obtener_diagnosticos()
+        resultado = mostrar_diagnosticos()
     elif opcion == "6":
         return
     else:
         print("Opción no válida")
-    for r in resultado: print(r.to_dict())
+    #for r in resultado: print(r.to_dict())
     input("Presione enter para continuar")
     limpiar_pantalla()
 
