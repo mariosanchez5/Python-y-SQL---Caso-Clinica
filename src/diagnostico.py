@@ -16,4 +16,4 @@ class Diagnostico:
         }
 
     def __eq__(self, other):
-        return self.medico == other.medico and self.enfermedad == other.enfermedad and self.paciente == other.paciente
+        return self.rut_medico == other.rut_medico and self.rut_paciente == other.rut_paciente
