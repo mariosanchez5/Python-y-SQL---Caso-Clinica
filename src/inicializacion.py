@@ -207,20 +207,6 @@ def inicializar_datos():
         (9, "Gripe", "Examen de sangre", "Normal"),
         # Paciente 10: Saludable
     ]
-    # examenes_a_agregar = [
-    #     # (índice, nombre, resultado, prediagnostico)
-    #     (0, "Examen de sangre", "Normal", "Diabetes"),
-    #     (5, "Examen de orina", "Anormal", "Intoxicación"),
-    #     (7, "Examen de sangre", "Anormal", "Infección"),
-    #     (9, "Examen de sangre", "Normal", "Gripe"),
-    #     (2, "Endoscopía", "Anormal", "Gastritis"),
-    #     (4, "Radiografía", "Anormal", "Neumonía"),
-    #     (1, "Examen de sangre", "Anormal", "Anemia"),
-    #     (6, "PCR", "Normal", "Covid-19"),
-    #     (8, "Examen de orina", "Normal", "Intoxicación"),
-    #     (3, "Endoscopía", "Normal", "Gastritis")
-
-    # ]
 
     for examen in examenes_a_agregar:
         paciente = obtener_paciente_por_rut(pacientes_a_agregar[examen[0]][2])
