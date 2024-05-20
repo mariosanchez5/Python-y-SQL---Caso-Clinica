@@ -15,8 +15,5 @@ class Diagnostico:
             'examenes': self.id_examenes
         }
 
-    def to_row(self):
-        return (self.medico, self.enfermedad, self.paciente, id_examenes)
-
     def __eq__(self, other):
         return self.medico == other.medico and self.enfermedad == other.enfermedad and self.paciente == other.paciente

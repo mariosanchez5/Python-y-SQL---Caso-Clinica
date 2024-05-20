@@ -180,15 +180,32 @@ def inicializar_datos():
     examenes_a_agregar = [
         # (índice paciente, prediagnóstico, nombre, resultado)
         (0, "Diabetes", "Examen de sangre", "Normal"),
-        (5, "Intoxicación", "Examen de orina", "Anormal"),
-        (7, "Infección", "Examen de sangre", "Anormal"),
-        (9, "Gripe", "Examen de sangre", "Normal"),
-        (2, "Gastritis", "Endoscopía", "Anormal"),
-        (4, "Neumonía", "Radiografía", "Anormal"),
+        (0, "Hipertensión", "Examen de sangre", "Anormal"),
+        # Paciente 1: Hipertenso
         (1, "Anemia", "Examen de sangre", "Anormal"),
+        (1, "Anemia", "Ecografía", "Normal"),
+        # Paciente 2: Anémico
+        (2, "Gastritis", "Endoscopía", "Anormal"),
+        (2, "Gastritis", "Examen de sangre", "Normal"),
+        # Paciente 3: Gastritis
+        (3, "Gastritis", "Endoscopía", "Normal"),
+        # Paciente 4: Saludable
+        (4, "Neumonía", "Radiografía", "Normal"),
+        (4, "Neumonía", "Examen de sangre", "Normal"),
+        # Paciente 5: Saludable
+        (5, "Diabetes", "Examen de orina", "Anormal"),
+        (5, "Intoxicación", "Examen de sangre", "Anormal"),
+        # Paciente 6: Intoxicado y diabético
         (6, "Covid-19", "PCR", "Normal"),
-        (8, "Intoxicación", "Examen de orina", "Normal"),
-        (3, "Gastritis", "Endoscopía", "Normal")
+        (6, "Covid-19", "Examen de sangre", "Normal"),
+        # Paciente 7: Saludable
+        (7, "Infección", "Examen de sangre", "Normal"),
+        (7, "Infección", "Examen de orina", "Normal"),
+        # Paciente 8: Saludable
+        (8, "Intoxicación", "Examen de orina", "Anormal"),
+        # Paciente 9: Intoxicado
+        (9, "Gripe", "Examen de sangre", "Normal"),
+        # Paciente 10: Saludable
     ]
     # examenes_a_agregar = [
     #     # (índice, nombre, resultado, prediagnostico)
@@ -221,31 +238,26 @@ def inicializar_datos():
         guardar_paciente(paciente)
 
     pacientes_con_examenes = obtener_pacientes()
-    for paciente in pacientes_con_examenes:
-        print(paciente.to_dict())
-    
-    input("Presione enter para continuar")
-
+ 
     global contador_diagnosticos
     contador_diagnosticos = 0
     
     def siguiente_diagnostico(examenes_por_revisar):
         global contador_diagnosticos
         contador_diagnosticos += 1
-        anomalos = [ i for i in examenes_paciente if i.resultado == "Anormal" ]
+        anomalos = [ i for i in examenes_por_revisar if i.resultado == "Anormal" ]
         for e in anomalos:
             # Eliminar el examen actual de la lista de exámenes por revisar
-            for r in examenes_por_revisar:
-                if e.id == r.id:
-                    examenes_por_revisar.remove(r)
-                    break
+            examenes_por_revisar = [ i for i in examenes_por_revisar if i.id != e.id]
+
             # Buscar exámenes relacionados con la enfermedad
-            examenes_diagnostico = []
+            examenes_diagnostico = [e.id]
             enfermedad = e.prediagnostico
             for i in examenes_por_revisar:
                 if i.prediagnostico == enfermedad:
-                    examenes_diagnostico.append(i).id
-                    examenes_por_revisar.remove(i)
+                    examenes_diagnostico.append(i.id)
+            # Quitar los exámenes relacionados de la lista de exámenes por revisar
+            examenes_por_revisar = [ i for i in examenes_por_revisar if i.id not in examenes_diagnostico] 
             # Retornar diagnóstico: (id, enfermedad, [id_examenes])
             yield (contador_diagnosticos, enfermedad, examenes_diagnostico) 
 
@@ -267,10 +279,11 @@ def inicializar_datos():
                 paciente=p.rut,
                 examenes=d[2]
             )
-            diagnosticos_paciente.append(diagnostico)
+            p.agregar_diagnostico(diagnostico)
             guardar_diagnostico(diagnostico)
-
         guardar_paciente(p)
 
     print("Datos de prueba inicializados!")
     print()
+    input("Presiona ENTER para continuar...")
+    print("\n\n\n\n\n\n")
