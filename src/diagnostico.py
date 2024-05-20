@@ -14,6 +14,3 @@ class Diagnostico:
             'paciente': self.rut_paciente,
             'examenes': self.id_examenes
         }
-
-    def __eq__(self, other):
-        return self.rut_medico == other.rut_medico and self.rut_paciente == other.rut_paciente
